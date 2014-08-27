@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Play: Employment Game Prototype</title>
+    <meta charset="utf-8">
+    
+    <script src="static/js/d3.v3.js", type="text/javascript"></script>
+    <script src="static/js/nv.d3.js", type="text/javascript"></script>
+    <script src="static/js/nvd3/tooltip.js"></script>
+    <script src="static/js/nvd3/utils.js"></script>
+    <script src="static/js/nvd3/interactiveLayer.js"></script>
+    <script src="static/js/nvd3/models/legend.js"></script>
+    <script src="static/js/nvd3/models/axis.js"></script>
+    <script src="static/js/nvd3/models/scatter.js"></script>
+    <script src="static/js/nvd3/models/line.js"></script>
+    <script src="static/js/nvd3/models/lineChart.js"></script>
+    <link href="static/css/nv.d3.css" rel="stylesheet" type="text/css">
+    
+</head>
+
+<body>
+      <div class='chart full' id='chart_time' style='width:100%%;height:50%%'>
+        <svg style='width:100%%;height:50%%'></svg>
+      </div>
+
+    <div id='interventions'>
+        Interventions
+        <input type='button' value='restart' onclick='doaction("init");'/>
+        <input type='button' value='nothing' onclick='doaction("nothing");'/>
+        <input type='button' value='hire people' onclick='doaction("hire people")';/>
+        <input type='button' value='downsize' onclick='doaction("downsize")';/>
+        <input type='button' value='undo' onclick='doaction("undo")';/>
+    </div>
+      
+<script>
+
+var chart_time;
+nv.addGraph(function() {
+    chart_time = nv.models.lineChart()
+                    .useInteractiveGuideline(true)
+                    .forceY([-100, 100])
+     .options({
+    margin: {left: 100, bottom: 100},
+    showXAxis: true,
+    showYAxis: true,
+    transitionDuration: 250
+  })
+                    
+                    
+                    
+    chart_time.xAxis     //Chart x-axis settings
+      .axisLabel('Time')
+      .tickFormat(d3.format(',.2f'));                    
+    chart_time.yAxis    
+      .tickFormat(d3.format(',.2f'));      
+  
+    return chart_time;
+    });
+
+
+
+function doaction(action) {
+    console.log(action);
+    
+    var data = new FormData();
+    data.append('action', action);
+    data.append('uuid', "%(uuid)s");
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/play.json', true);
+    xhr.onload = update;
+    xhr.send(data);
+}
+
+function update() {
+	data = JSON.parse(this.responseText);
+    
+    d3.select('#chart_time svg')
+        .datum(data)
+        .call(chart_time);
+    nv.utils.windowResize(chart_time.update);
+}
+
+doaction('init');
+
+</script>      
+      
+</body>
+</html>

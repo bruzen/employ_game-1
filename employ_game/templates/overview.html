@@ -66,6 +66,7 @@ var chart_bar;
 nv.addGraph(function() {
     chart_time = nv.models.lineChart()
                     .useInteractiveGuideline(true)
+                    .forceY([-100, 100])
                     //.transitionDuration(350);
                     
   .options({
