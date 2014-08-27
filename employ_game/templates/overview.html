@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Overview: Employment Game Prototype</title>
+    <meta charset="utf-8">
+    
+    <script src="static/js/d3.v3.js", type="text/javascript"></script>
+    <script src="static/js/nv.d3.js", type="text/javascript"></script>
+    <script src="static/js/nvd3/tooltip.js"></script>
+    <script src="static/js/nvd3/utils.js"></script>
+    <script src="static/js/nvd3/interactiveLayer.js"></script>
+    <script src="static/js/nvd3/models/legend.js"></script>
+    <script src="static/js/nvd3/models/axis.js"></script>
+    <script src="static/js/nvd3/models/scatter.js"></script>
+    <script src="static/js/nvd3/models/line.js"></script>
+    <script src="static/js/nvd3/models/lineChart.js"></script>
+    <link href="static/css/nv.d3.css" rel="stylesheet" type="text/css">
+    
+</head>
+
+<body>
+      <div class='chart full' id='chart_time' style='width:100%;height:50%'>
+        <svg style='width:100%;height:50%'></svg>
+      </div>
+
+      <div class='chart full' id='chart_bar' style='width:100%;height:50%'>
+        <svg style='width:100%;height:50%'></svg>
+      </div>
+      
+<script>
+
+var bar_labels = ['employment', 'cost', 'efficiency'];
+
+
+
+function update() {
+    var data = new FormData();
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/overview.json', true);
+    xhr.onload = update_overview;
+    xhr.send(data);
+}
+
+
+
+function update_overview() {
+	data = JSON.parse(this.responseText);
+    //data = sinAndCos()
+    
+    d3.select('#chart_time svg')
+        .datum(data.time)
+        .call(chart_time);
+    nv.utils.windowResize(chart_time.update);
+    
+    d3.select('#chart_bar svg')
+        .datum(data.bar)
+        .call(chart_bar);
+
+    nv.utils.windowResize(chart_bar.update);
+    }
+
+
+
+var chart_time;
+var chart_bar;
+nv.addGraph(function() {
+    chart_time = nv.models.lineChart()
+                    .useInteractiveGuideline(true)
+                    //.transitionDuration(350);
+                    
+  .options({
+    margin: {left: 150, bottom: 100},
+    showXAxis: true,
+    showYAxis: true,
+    transitionDuration: 250
+  })
+                    
+                    
+                    
+    chart_time.xAxis     //Chart x-axis settings
+      .axisLabel('Time')
+      .tickFormat(d3.format(',.2f'));                    
+    chart_time.yAxis     //Chart x-axis settings
+      .axisLabel('Employment')
+      .tickFormat(d3.format(',.2f'));                    
+    return chart_time;
+    });
+
+nv.addGraph(function() {
+    chart_bar = nv.models.multiBarChart()
+  .options({
+    margin: {left: 150, bottom: 100},
+    showXAxis: true,
+    showYAxis: true,
+    showControls: false,
+    showLegend: false,
+    reduceXTicks: false,
+    transitionDuration: 250
+  })
+                    
+    
+    chart_bar.xAxis     //Chart x-axis settings
+      .tickFormat(function(d) { return bar_labels[d];});                   
+                    
+                    
+    chart_bar.yAxis     //Chart x-axis settings
+      .axisLabel('Employment')
+      .tickFormat(d3.format(',.2f'));                    
+    return chart_bar;
+    });
+    
+
+window.setInterval(update, 1000);    
+    
+update();    
+</script>      
+      
+</body>
+</html>
