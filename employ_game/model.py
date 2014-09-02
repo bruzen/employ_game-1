@@ -205,8 +205,13 @@ class Model:
         self.employers = [Employer(self.society)
                           for i in range(self.employer_count)]
         self.people = []
+        self.steps = 0
+        self.interventions = []
 
     def step(self):
+        self.steps += 1
+        for interv in self.interventions:
+            interv.apply(self, self.steps)
 
         for i in range(self.people_per_step):
             self.people.append(Person(self.society))
@@ -309,14 +314,35 @@ class Model:
 
 
     def check_jobs(self):
-        #for p in self.people:
-        #    print p.features, p.job.type if p.job is not None else None
-        for e in self.employers:
-            print e.total_net
+        for p in self.people:
+            print p.features, p.job.type if p.job is not None else None
+        #for e in self.employers:
+        #    print e.total_net
 
 
 
 
+
+
+class HighschoolCertificateIntervention:
+    def __init__(self, time, proportion):
+        self.time = time
+        self.proportion = proportion
+
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            for p in model.people:
+                if 'no_highschool' in p.features:
+                    if model.rng.rand() < self.proportion:
+                        p.features.append('highschool')
+                        p.features.remove('no_highschool')
+        else:
+            for p in model.people:
+                if p.age == 16:
+                    if 'no_highschool' in p.features:
+                        if model.rng.rand() < self.proportion:
+                            p.features.append('highschool')
+                            p.features.remove('no_highschool')
 
 
 
@@ -325,7 +351,10 @@ class Model:
 if __name__ == '__main__':
 
     m = Model()
+
+    m.interventions.append(HighschoolCertificateIntervention(50, 1.0))
     m.step()
+
     for i in range(1000):
         print i, len(m.people), m.calc_employment()
         m.check_jobs()
