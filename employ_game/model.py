@@ -13,8 +13,9 @@ class Society:
         #         other terms are p(F|term)
         #         underscores_like_this are p(F|underscores^like^this)
         self.probs = [
-            ('prison', dict(overall=0.4, male=0.2, female=0.1, white=0.2,
-                           black=0.3, black_male=0.9)),
+            #('prison', dict(overall=0.4, male=0.2, female=0.1, white=0.2,
+            #               black=0.3, black_male=0.9)),
+            ('prison', dict(overall=0.3)),
             ('highschool', dict(overall=0.8, male=0.8, female=0.8, white=0.9,
                            black=0.7)),
 
@@ -25,8 +26,8 @@ class Society:
             'security': dict(highschool=0.7, prison=None),
             }
         self.job_commonality = {
-            'service': 0.5,
-            'security': 0.5,
+            'service': 0.7,
+            'security': 0.3,
             }
         self.job_income = {
             'service': (20000, 1000),   # starting, annual raise
@@ -77,7 +78,11 @@ class Society:
                             relevant.remove(p)
                     relevant.append(k)
         pF = prob['overall']
+        if len(relevant) == 0:
+            return pF
         p = [prob[k] for k in relevant]
+        if len(p) == 1:
+            return p
         all = np.prod(p)
         none = np.prod([1-pp for pp in p])
         probability = all / (all + (pF / (1-pF)) * none)
@@ -167,17 +172,20 @@ class Model:
                     if p.does_apply(j):
                         applications[j].append(p)
 
+        interview = {}
+        for job, applicants in applications.items():
+            for a in applicants:
+                score = job.compute_suitability(a)
+                score += self.rng.normal(a.attributes['interview_skill'],
+                                         a.attributes['interview_skill_sd'])
+                interview[(job, a)] = score
+
         iterations = 10
         for i in range(iterations):
             all_offers = {}
             for job, applicants in applications.items():
 
-                #TODO: optimize this so it isn't computed each iteration
-                score = [job.compute_suitability(a) for a in applicants]
-
-                for i,a in enumerate(applicants):
-                    score[i] += self.rng.normal(a.attributes['interview_skill'],
-                                                a.attributes['interview_skill_sd'])
+                score = [interview[(job, a)] for a in applicants]
 
                 if len(score) > 0:
                     max_score = max(score)
@@ -199,12 +207,32 @@ class Model:
                         person.job = job
                         job.employee = person
 
+        self.increase_age()
+        self.remove_older()
+
+    def increase_age(self):
+        for p in self.people:
+            p.age += self.years_per_step
+
+    def remove_older(self):
+        for p in self.people:
+            if p.age > self.max_age:
+                self.people.remove(p)
+                if p.job is not None:
+                    p.job.employee = None
+
+
     def calc_employment(self):
         count = 0
         for p in self.people:
             if p.job is not None:
                 count += 1
         return float(count)/len(self.people)
+
+
+    def check_jobs(self):
+        for p in self.people:
+            print p.features, p.job.type if p.job is not None else None
 
 
 
@@ -218,8 +246,9 @@ if __name__ == '__main__':
 
     m = Model()
     m.step()
-    for i in range(100):
+    for i in range(1000):
         print i, len(m.people), m.calc_employment()
+        #m.check_jobs()
         m.step()
 
 
