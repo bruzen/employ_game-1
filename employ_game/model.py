@@ -23,7 +23,7 @@ class Society:
 
         self.jobs = {
             'service': dict(highschool=0.5),
-            'security': dict(highschool=0.7, prison=None),
+            'security': dict(highschool=0.7, prison=None, experience=0.5),
             }
         self.job_commonality = {
             'service': 0.7,
@@ -33,18 +33,25 @@ class Society:
             'service': (20000, 1000),   # starting, annual raise
             'security': (40000, 2000),
         }
+        self.job_retention = {
+            'service': [0.2, 0.6],
+            'security': [0.7, 0.8],
+            }
 
         self.neighbourhoods = [Neighbourhood(self)
                                for i in range(self.neighbourhood_count)]
 
+    # numerical
     def create_attributes(self):
         attr = {}
         attr['prob_apply'] = self.rng.normal(0.5, 0.25)
         attr['distance_penalty'] = self.rng.uniform(0, 0.5)
         attr['interview_skill'] = self.rng.normal(0.2, 0.2)
         attr['interview_skill_sd'] = self.rng.uniform(0.1, 0.4)
+        attr['experience'] = 0.0
         return attr
 
+    # binary
     def create_features(self):
         features = []
         features.append(self.pick_one(self.gender))
@@ -145,8 +152,8 @@ class Neighbourhood:
 
 
 class Model:
-    employer_count = 100
-    people_per_step = 10
+    employer_count = 10
+    people_per_step = 1
     years_per_step = 0.1
     max_age = 25
 
@@ -158,6 +165,7 @@ class Model:
         self.people = []
 
     def step(self):
+
         for i in range(self.people_per_step):
             self.people.append(Person(self.society))
 
@@ -206,13 +214,39 @@ class Model:
 
                         person.job = job
                         job.employee = person
+                        person.job_evaluation = 'medium'
+                        person.job_length = 0.0
 
         self.increase_age()
         self.remove_older()
+        self.job_evaluation()
+
+    def job_evaluation(self):
+        for p in self.people:
+            if p.job is not None:
+                index = int(p.job_length)
+                retention = self.society.job_retention[p.job.type]
+                if index >= len(retention):
+                    r = retention[-1]
+                else:
+                    r = retention[index]
+                r = (1-r) * self.years_per_step
+                if self.society.rng.rand() < r:
+                    self.fire(p)
+
+    def fire(self, person):
+        assert person.job is not None
+        person.job.employee = None
+        person.job = None
+
+
 
     def increase_age(self):
         for p in self.people:
             p.age += self.years_per_step
+            if p.job is not None:
+                p.job_length += self.years_per_step
+                p.attributes['experience'] += self.years_per_step
 
     def remove_older(self):
         for p in self.people:
