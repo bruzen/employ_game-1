@@ -37,6 +37,14 @@ class Society:
             'service': [0.2, 0.6],
             'security': [0.7, 0.8],
             }
+        self.job_productivity = {
+            'service': (50000, 1),   # starting, annual raise
+            'security': (80000, 0.5),
+        }
+        self.job_hiring = {
+            'service': 5000,   # starting, annual raise
+            'security': 20000,
+        }
 
         self.neighbourhoods = [Neighbourhood(self)
                                for i in range(self.neighbourhood_count)]
@@ -101,6 +109,7 @@ class Person:
         self.society = society
         self.age = 16
         self.job = None
+        self.income = 0
         self.features = society.create_features()
         self.attributes = society.create_attributes()
         self.neighbourhood = society.rng.choice(society.neighbourhoods)
@@ -124,8 +133,38 @@ class Person:
 class Employer:
     jobs_per_employer = 10
     def __init__(self, society):
+        self.society = society
         self.jobs = [Job(society, self) for i in range(self.jobs_per_employer)]
         self.neighbourhood = society.rng.choice(society.neighbourhoods)
+        self.total_hiring_cost = 0
+        self.total_salary = 0
+        self.total_productivity = 0
+        self.total_net = 0
+
+    def step(self, dt):
+        self.hiring_cost = 0
+        self.salary = 0
+        self.productivity = 0
+
+        for j in self.jobs:
+            if j.employee is not None:
+                start, slope = self.society.job_income[j.type]
+                salary = start + j.employee.job_length * slope
+                self.salary += salary * dt
+                j.employee.income += salary * dt
+
+                prod_max, prod_time = self.society.job_productivity[j.type]
+                prod = prod_max * (1-np.exp(-j.employee.job_length/prod_time))
+                self.productivity += prod * dt
+
+                if j.employee.job_length == 0.0:
+                    self.hiring_cost += self.society.job_hiring[j.type]
+
+            self.net = self.productivity - self.hiring_cost - self.salary
+        self.total_net += self.net
+        self.total_salary += self.salary
+        self.total_productivity += self.productivity
+        self.total_hiring_cost += self.hiring_cost
 
 class Job:
     def __init__(self, society, employer):
@@ -145,6 +184,9 @@ class Job:
             elif feature in person.attributes:
                 total += value * person.attributes[feature]
         return total
+
+
+
 
 class Neighbourhood:
     def __init__(self, society):
@@ -217,6 +259,8 @@ class Model:
                         person.job_evaluation = 'medium'
                         person.job_length = 0.0
 
+        for e in self.employers:
+            e.step(self.years_per_step)
         self.increase_age()
         self.remove_older()
         self.job_evaluation()
@@ -265,8 +309,10 @@ class Model:
 
 
     def check_jobs(self):
-        for p in self.people:
-            print p.features, p.job.type if p.job is not None else None
+        #for p in self.people:
+        #    print p.features, p.job.type if p.job is not None else None
+        for e in self.employers:
+            print e.total_net
 
 
 
@@ -282,7 +328,7 @@ if __name__ == '__main__':
     m.step()
     for i in range(1000):
         print i, len(m.people), m.calc_employment()
-        #m.check_jobs()
+        m.check_jobs()
         m.step()
 
 
