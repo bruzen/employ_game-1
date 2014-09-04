@@ -21,7 +21,6 @@
 
 <body>
 
-
     <div id='top_bar'>
     <div id='title'>
       Scores
@@ -29,11 +28,11 @@
 
     </div>
 
-      <div class='chart full' id='chart_time' style='width:100%;height:50%'>
-        <svg style='width:100%;height:50%'></svg>
+      <div class='menu' id='menu' style='width:100%;height:30px;background:#ccc;border:0px;'>
+        <input type='button' value='New Game' onclick="window.open('/play');"/>
       </div>
 
-      <div class='chart full' id='chart_bar' style='width:100%;height:50%'>
+      <div class='chart full' id='chart_bar' style='width:100%;height:50%;border:0px;'>
         <svg style='width:100%;height:50%'></svg>
       </div>
       
@@ -47,8 +46,6 @@
 <script>
 
 var bar_labels = ['employment', 'highschool', 'efficiency'];
-
-
 
 function update() {
     var data = new FormData();
