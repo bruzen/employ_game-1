@@ -4,13 +4,24 @@ import random
 import uuid
 
 import pkgutil
-import employ_game
+#import employ_game
+import swi
+
+class P:
+    "mock pkgutil which only does what we need and no more"
+    def __init__(self):
+        self._root = os.path.dirname(os.path.realpath(__file__))
+    def get_data(self, module, fn):
+        assert module == "employ_game"
+        return open(os.path.join(self._root, fn)).read()
+pkgutil = P()
+
 import model
 
 actions = {}
 seeds = {}
 
-class Server(employ_game.swi.SimpleWebInterface):
+class Server(swi.SimpleWebInterface):
     def swi_static(self, *path):
         if self.user is None: return
         fn = os.path.join('static', *path)
