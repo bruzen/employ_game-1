@@ -1,11 +1,12 @@
 import numpy as np
+from collections import OrderedDict
 
 class Society:
     neighbourhood_count = 3
     def __init__(self, rng):
         self.rng = rng
-        self.gender = dict(male=0.5, female=0.5)
-        self.race = dict(black=0.3, white=0.3, hispanic=0.2, asian=0.2)
+        self.gender = OrderedDict(male=0.5, female=0.5)
+        self.race = OrderedDict(black=0.3, white=0.3, hispanic=0.2, asian=0.2)
 
         # NOTE: order matters!  probabilities can be conditional on anything
         #       that is above them in the list below
@@ -15,35 +16,35 @@ class Society:
         self.probs = [
             #('prison', dict(overall=0.4, male=0.2, female=0.1, white=0.2,
             #               black=0.3, black_male=0.9)),
-            ('prison', dict(overall=0.3)),
-            ('highschool', dict(overall=0.8, male=0.8, female=0.8, white=0.9,
-                           black=0.7)),
-
+            ('prison', OrderedDict(overall=0.3)),
+            ('highschool', OrderedDict(overall=0.4)),
             ]
 
         self.jobs = {
             'service': dict(highschool=0.5),
-            'security': dict(highschool=0.7, prison=None, experience=0.5),
+            'trade': dict(no_highschool=-0.5, prison=None),
+            'security': dict(no_highschool=None, prison=None, experience=0.5),
             }
-        self.job_commonality = {
-            'service': 0.7,
-            'security': 0.3,
-            }
+        self.job_commonality = OrderedDict(service=0.4, security=0.3, trade=0.3)
         self.job_income = {
             'service': (20000, 1000),   # starting, annual raise
             'security': (40000, 2000),
+            'trade': (30000, 2000),
         }
         self.job_retention = {
             'service': [0.2, 0.6],
             'security': [0.7, 0.8],
+            'trade': [0.4, 0.8],
             }
         self.job_productivity = {
-            'service': (50000, 1),   # starting, annual raise
+            'service': (50000, 1),
             'security': (80000, 0.5),
+            'trade': (60000, 0.5),
         }
         self.job_hiring = {
-            'service': 5000,   # starting, annual raise
+            'service': 5000,
             'security': 20000,
+            'trade': 30000,
         }
 
         self.neighbourhoods = [Neighbourhood(self)
@@ -73,6 +74,7 @@ class Society:
         return features
 
     def pick_one(self, options):
+        assert isinstance(options, OrderedDict)
         return self.rng.choice(options.keys(), p=options.values())
 
     def compute_conditional(self, feature, prob):
@@ -207,6 +209,8 @@ class Model:
         self.people = []
         self.steps = 0
         self.interventions = []
+        self.data = {}
+        self.init_data()
 
     def step(self):
         self.steps += 1
@@ -216,7 +220,8 @@ class Model:
         for i in range(self.people_per_step):
             self.people.append(Person(self.society))
 
-        applications = {}
+
+        applications = OrderedDict()
         for e in self.employers:
             for j in e.jobs:
                 if j.employee is None:
@@ -237,7 +242,7 @@ class Model:
 
         iterations = 10
         for i in range(iterations):
-            all_offers = {}
+            all_offers = OrderedDict()
             for job, applicants in applications.items():
 
                 score = [interview[(job, a)] for a in applicants]
@@ -269,6 +274,8 @@ class Model:
         self.increase_age()
         self.remove_older()
         self.job_evaluation()
+
+        self.update_data()
 
     def job_evaluation(self):
         for p in self.people:
@@ -311,6 +318,15 @@ class Model:
             if p.job is not None:
                 count += 1
         return float(count)/len(self.people)
+    def calc_feature_rate(self, feature):
+        count = 0
+        for p in self.people:
+            if feature in p.features:
+                count += 1
+        return float(count)/len(self.people)
+
+    def calc_employer_net(self):
+        return sum([e.net for e in self.employers])
 
 
     def check_jobs(self):
@@ -319,6 +335,19 @@ class Model:
         #for e in self.employers:
         #    print e.total_net
 
+    def init_data(self):
+        self.data['employment'] = []
+        self.data['employer_net'] = []
+        self.data['highschool'] = []
+
+    def update_data(self):
+        if self.steps >= 100:
+            self.data['employment'].append(self.calc_employment()*100)
+            self.data['employer_net'].append(self.calc_employer_net()*0.001)
+            self.data['highschool'].append(self.calc_feature_rate('highschool')*100)
+
+    def get_data(self):
+        return self.data
 
 
 
@@ -336,19 +365,53 @@ class HighschoolCertificateIntervention:
                     if model.rng.rand() < self.proportion:
                         p.features.append('highschool')
                         p.features.remove('no_highschool')
-        else:
+        elif timestep > self.time:
             for p in model.people:
-                if p.age == 16:
+                if p.age < 16 + Model.years_per_step * 2:
                     if 'no_highschool' in p.features:
                         if model.rng.rand() < self.proportion:
                             p.features.append('highschool')
                             p.features.remove('no_highschool')
+
+def memoize(f):
+    """ Memoization decorator for functions taking one or more arguments. """
+    class memodict(dict):
+        def __init__(self, f):
+            self.f = f
+        def __call__(self, *args):
+            return self[args]
+        def __missing__(self, key):
+            ret = self[key] = self.f(*key)
+            return ret
+    return memodict(f)
+
+@memoize
+def run(seed, *actions):
+    m = Model(seed=seed)
+    presteps = 100
+    steps_per_action = 10
+    for i in range(presteps):
+        m.step()
+    for i, action in enumerate(actions):
+        if action == 'hs_diploma':
+            interv = HighschoolCertificateIntervention(presteps + 1 +
+                                                       steps_per_action * i,
+                                                       1.0)
+            m.interventions.append(interv)
+        for ii in range(steps_per_action):
+            m.step()
+    return m.get_data()
+
 
 
 
 
 
 if __name__ == '__main__':
+    print run(1, 'init', 'hs_diploma')['highschool']
+    1/0
+
+
 
     m = Model()
 
