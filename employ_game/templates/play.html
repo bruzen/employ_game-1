@@ -15,21 +15,37 @@
     <script src="static/js/nvd3/models/line.js"></script>
     <script src="static/js/nvd3/models/lineChart.js"></script>
     <link href="static/css/nv.d3.css" rel="stylesheet" type="text/css">
+    <link href="static/css/teststyle.css" rel="stylesheet" type="text/css">
     
 </head>
 
 <body>
-      <div class='chart full' id='chart_time' style='width:100%%;height:50%%'>
-        <svg style='width:100%%;height:50%%'></svg>
-      </div>
+
+    <div id='top_bar'>
+    <div id='title'>
+      Interventions
+    </div>
 
     <div id='interventions'>
-        Interventions
+        <!--Interventions-->
+        <div id='cen'>
         <input type='button' value='restart' onclick='doaction("init");'/>
         <input type='button' value='nothing' onclick='doaction("nothing");'/>
         <input type='button' value='hire people' onclick='doaction("hire people")';/>
         <input type='button' value='downsize' onclick='doaction("downsize")';/>
         <input type='button' value='undo' onclick='doaction("undo")';/>
+        </div>
+    </div>
+    </div>
+
+      <div class='chart full' id='chart_time' style='width:100%%;height:50%%;opacity:0%%'>
+        <svg style='width:100%%;height:50%%'></svg>
+      </div>
+
+    
+    <hr>
+    <div id='logo'>
+      <img src="/static/img/lo-logos.png" />
     </div>
       
 <script>

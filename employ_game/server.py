@@ -19,6 +19,8 @@ class Server(employ_game.swi.SimpleWebInterface):
             mimetype = 'text/css'
         elif fn.endswith('.png'):
             mimetype = 'image/png'
+        elif fn.endswith('.jpg'):
+            mimetype = 'image/jpg'
         elif fn.endswith('.gif'):
             mimetype = 'image/gif'
         else:
