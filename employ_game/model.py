@@ -400,7 +400,7 @@ def find_cached_model(seed, actions):
     for i in range(presteps):
         model.step()
     model_cache[(seed, ())] = copy.deepcopy(model)
-    return 0, model
+    return -1, model
 
 @memoize
 def run(seed, *actions):
@@ -408,7 +408,7 @@ def run(seed, *actions):
     presteps = 100
     steps_per_action = 10
     for i, action in enumerate(actions):
-        if i >= step:  # if we haven't done this step yet
+        if i > step:  # if we haven't done this step yet
             if action == 'hs_diploma':
                 interv = HighschoolCertificateIntervention(presteps + 1 +
                                                            steps_per_action * i,
