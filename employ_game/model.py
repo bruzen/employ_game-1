@@ -385,22 +385,39 @@ def memoize(f):
             return ret
     return memodict(f)
 
+
+model_cache = {}
+import copy
+
+def find_cached_model(seed, actions):
+    for step in reversed(range(len(actions))):
+        result = model_cache.get((seed, tuple(actions[:step])), None)
+        if result is not None:
+            step, model = result
+            return step, copy.deepcopy(model)
+    model = Model(seed=seed)
+    presteps = 100
+    for i in range(presteps):
+        model.step()
+    model_cache[(seed, ())] = copy.deepcopy(model)
+    return -1, model
+
 @memoize
 def run(seed, *actions):
-    m = Model(seed=seed)
+    step, model = find_cached_model(seed, actions)
     presteps = 100
     steps_per_action = 10
-    for i in range(presteps):
-        m.step()
     for i, action in enumerate(actions):
-        if action == 'hs_diploma':
-            interv = HighschoolCertificateIntervention(presteps + 1 +
-                                                       steps_per_action * i,
-                                                       1.0)
-            m.interventions.append(interv)
-        for ii in range(steps_per_action):
-            m.step()
-    return m.get_data()
+        if i > step:  # if we haven't done this step yet
+            if action == 'hs_diploma':
+                interv = HighschoolCertificateIntervention(presteps + 1 +
+                                                           steps_per_action * i,
+                                                           1.0)
+                model.interventions.append(interv)
+            for ii in range(steps_per_action):
+                model.step()
+            model_cache[(seed, tuple(actions[:i]))] = (i, copy.deepcopy(model))
+    return model.get_data()
 
 
 
@@ -408,7 +425,12 @@ def run(seed, *actions):
 
 
 if __name__ == '__main__':
+    print 1
     print run(1, 'init', 'hs_diploma')['highschool']
+    print 2
+    print run(1, 'init', 'none')['highschool']
+    print run(1, 'init', 'none', 'none')['highschool']
+    print 3
     1/0
 
 
