@@ -15,7 +15,9 @@ text {
   /*margin-bottom: 2em;*/
 }
 .chart.full {
-  width: 100%;
+  width: 80%;
+  height: 50%;
+  margin-left: auto; margin-right: auto;
 }
 
 .chart.half {
@@ -38,6 +40,15 @@ text {
   margin-bottom: 1em;
 }
 
+@font-face {
+  font-family: "Quicksand";
+  src: url(/static/font/quicksand/Quicksand-Regular.otf);
+}
+
+body {
+  font-family: "Quicksand";
+}
+
 /*
 // interventions to top
 // change font
@@ -45,11 +56,19 @@ text {
 // title logo
 */
 
+#top_bar {
+  margin-bottom: 2em;
+}
+
+#logo {
+}
+
 #logo>img {
   margin-left: auto;
   margin-right: auto;
-  width: 70%;  /* this too, probably */
+  width: 50%;  /* this too, probably */
   display: block; /*required for margin-centering to take effect */
+  
   
   margin-top: 70px;
 }
@@ -87,3 +106,4 @@ hr {
   margin-right: auto;
   
 }
+

@@ -23,6 +23,8 @@ class Server(employ_game.swi.SimpleWebInterface):
             mimetype = 'image/jpg'
         elif fn.endswith('.gif'):
             mimetype = 'image/gif'
+        elif fn.endswith('.otf'):
+            mimetype = 'font/font'
         else:
             raise Exception('unknown extenstion for %s' % fn)
 
