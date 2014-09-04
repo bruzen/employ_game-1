@@ -1,7 +1,7 @@
 import os.path
 import json
 import random
-import uuid
+import uuid as uuid_package
 
 import pkgutil
 import employ_game
@@ -32,13 +32,13 @@ class Server(employ_game.swi.SimpleWebInterface):
         icon = pkgutil.get_data('employ_game', 'static/favicon.ico')
         return ('image/ico', icon)
 
-    def swi(self):
-        if self.user is None:
-            return self.create_login_form()
-        html = pkgutil.get_data('employ_game', 'templates/index.html')
-        return html % dict(uuid=uuid.uuid4())
+    #def swi(self):
+    #    if self.user is None:
+    #        return self.create_login_form()
+    #    html = pkgutil.get_data('employ_game', 'templates/index.html')
+    #    return html# % dict(uuid=uuid_package.uuid4())
 
-    def swi_overview(self):
+    def swi(self):
         if self.user is None:
             return self.create_login_form()
         html = pkgutil.get_data('employ_game', 'templates/overview.html')
@@ -74,7 +74,9 @@ class Server(employ_game.swi.SimpleWebInterface):
 
         return json.dumps(dict(time=time, bar=bar))
 
-    def swi_play(self, uuid):
+    def swi_play(self, uuid=None):
+        if uuid is None:
+            uuid = uuid_package.uuid4()
         if self.user is None:
             return self.create_login_form()
         html = pkgutil.get_data('employ_game', 'templates/play.html')
@@ -82,7 +84,7 @@ class Server(employ_game.swi.SimpleWebInterface):
 
     def run_game(self, u):
         # TODO: add command line argument to set this seed globally
-        seed = uuid.UUID(u).int & 0x7fffffff
+        seed = uuid_package.UUID(u).int & 0x7fffffff
         acts = actions[u]
 
         return model.run(seed, *acts)

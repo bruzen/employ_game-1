@@ -390,17 +390,13 @@ model_cache = {}
 import copy
 
 def find_cached_model(seed, actions):
-    print 'keys', model_cache.keys()
     for step in reversed(range(len(actions)+1)):
-        print 'checking for', seed, actions[:step]
         result = model_cache.get((seed, tuple(actions[:step])), None)
         if result is not None:
             step, model = result
-            print 'found', step, model.steps
             return step, copy.deepcopy(model)
     model = Model(seed=seed)
     presteps = 100
-    print 'running initial presteps'
     for i in range(presteps):
         model.step()
     model_cache[(seed, ())] = copy.deepcopy(model)
@@ -409,13 +405,10 @@ def find_cached_model(seed, actions):
 @memoize
 def run(seed, *actions):
     step, model = find_cached_model(seed, actions)
-    print 'looked for', actions
-    print 'found', step, model.steps
     presteps = 100
     steps_per_action = 10
     for i, action in enumerate(actions):
         if i > step:  # if we haven't done this step yet
-            print 'running step', i, action
             if action == 'hs_diploma':
                 interv = HighschoolCertificateIntervention(presteps + 1 +
                                                            steps_per_action * i,
