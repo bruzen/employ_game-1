@@ -45,7 +45,7 @@ text {
   src: url(/static/font/quicksand/Quicksand-Regular.otf);
 }
 
-body {
+body, button, input {
   font-family: "Quicksand";
 }
 
