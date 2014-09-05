@@ -365,6 +365,7 @@ class Model:
         self.data['highschool'] = []
         for race in self.society.race.keys():
             self.data['employment_%s' % race] = []
+            self.data['proportion_%s' % race] = []
 
     def update_data(self):
         if self.steps >= 100:
@@ -373,6 +374,7 @@ class Model:
             self.data['highschool'].append(self.calc_feature_rate('highschool')*100)
             for race in self.society.race.keys():
                 self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
+                self.data['proportion_%s' % race].append(self.calc_feature_rate(race)*100)
 
     def get_data(self):
         return self.data

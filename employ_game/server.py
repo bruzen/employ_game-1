@@ -143,7 +143,8 @@ class Server(employ_game.swi.SimpleWebInterface):
             time.append(dict(values=values, key=key, color=color, area=False))
 
         race = []
-        for k in data.keys():
+        race_pie = []
+        for k in sorted(data.keys()):
             if k.startswith('employment_'):
                 key = k[11:]
                 color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][len(race) % 6]
@@ -153,7 +154,12 @@ class Server(employ_game.swi.SimpleWebInterface):
                 values.append(dict(x=maximum, y=None))
                 race.append(dict(values=values, key=key, color=color, area=False))
 
-        return json.dumps(dict(time=time, race=race))
+                p = data['proportion_%s' % key]
+                race_pie.append(dict(label=key, value=p[-1], color=color))
+
+
+
+        return json.dumps(dict(time=time, race=race, race_pie=race_pie))
 
 
     def create_login_form(self):

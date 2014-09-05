@@ -44,11 +44,15 @@
     </div>
 
       <div class='chart full' id='chart_time'>
-        <svg style='width:100%%;height:65%%'></svg>
+        <svg style='width:100%%;height:50%%'></svg>
       </div>
 
-      <div class='chart full' id='chart_race'>
-        <svg style='width:50%%;height:35%%'></svg>
+      <div id='chart_race_pie' style='display:inline-block'>
+        <svg style='width:100%%;height:35%%'></svg>
+      </div>
+
+      <div id='chart_race' style='display:inline-block'>
+        <svg style='width:150%%;height:35%%'></svg>
       </div>
     
     <hr>
@@ -76,7 +80,7 @@ nv.addGraph(function() {
                     .useInteractiveGuideline(true)
                     .forceY([0, 100])
      .options({
-    margin: {left: 100, bottom: 100},
+    margin: {left: 100, bottom: 40},
     showXAxis: true,
     showYAxis: true,
     transitionDuration: 250
@@ -99,7 +103,7 @@ nv.addGraph(function() {
                     .useInteractiveGuideline(true)
                     .forceY([0, 100])
      .options({
-    margin: {left: 100, bottom: 100},
+    margin: {left: 50, bottom: 30},
     showXAxis: true,
     showYAxis: true,
     transitionDuration: 250
@@ -111,11 +115,24 @@ nv.addGraph(function() {
       .axisLabel('Time')
       .tickFormat(d3.format(',.2f'));                    
     chart_time.yAxis    
+      .axisLabel('Employment')
       .tickFormat(d3.format(',.2f'));      
   
     return chart_race;
     });
 
+var chart_race_pie;
+nv.addGraph(function() {
+    chart_race_pie = nv.models.pieChart()
+       .x(function(d) { return d.label })
+       .y(function(d) { return d.value })
+       .showLabels(true);
+       
+    return chart_race_pie;   
+  })
+                    
+    
+    
 
 function doaction(action) {
     console.log(action);
@@ -143,6 +160,10 @@ function update() {
         .call(chart_race);
     nv.utils.windowResize(chart_race.update);
 
+    d3.select('#chart_race_pie svg')
+        .datum(data.race_pie)
+        .call(chart_race_pie);
+    nv.utils.windowResize(chart_race_pie.update);
     
 }
 
