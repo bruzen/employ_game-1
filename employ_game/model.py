@@ -57,6 +57,10 @@ class Society:
         for v in self.jobs.values():
             for r in races:
                 v[r] = -value
+    def adjust_retention(self, value):
+        for v in self.job_retention.values():
+            for i in range(len(v)):
+                v[i] = 0.5 * (v[i] + value)
 
 
 
@@ -379,6 +383,15 @@ class Model:
     def get_data(self):
         return self.data
 
+class RetentionIntervention:
+    def __init__(self, time, value):
+        self.time = time
+        self.value = value
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            model.society.adjust_retention(self.value)
+
+
 
 
 class SocietyParameterIntervention:
@@ -460,26 +473,26 @@ def run(seed, *actions):
     steps_per_action = 10
     for i, action in enumerate(actions):
         if i > step:  # if we haven't done this step yet
+            interv_step = presteps + 1 + steps_per_action * i
             if action == 'hs_diploma':
-                interv = HighschoolCertificateIntervention(presteps + 1 +
-                                                           steps_per_action * i,
-                                                           1.0)
+                interv = HighschoolCertificateIntervention(interv_step, 1.0)
                 model.interventions.append(interv)
             elif action == 'mobility+':
-                interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
+                interv = SocietyParameterIntervention(interv_step,
                                         'distance_penalty_scale', 0)
             elif action == 'mobility-':
-                interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
+                interv = SocietyParameterIntervention(interv_step,
                                         'distance_penalty_scale', 10000.0)
             elif action == 'discriminate-normal':
-                interv = DiscriminationIntervention(presteps + 1 + steps_per_action * i,
-                                        0.3)
+                interv = DiscriminationIntervention(interv_step, 0.3)
             elif action == 'discriminate-high':
-                interv = DiscriminationIntervention(presteps + 1 + steps_per_action * i,
-                                        2.0)
+                interv = DiscriminationIntervention(interv_step, 2.0)
             elif action == 'discriminate-low':
-                interv = DiscriminationIntervention(presteps + 1 + steps_per_action * i,
-                                        0.0)
+                interv = DiscriminationIntervention(interv_step, 0.0)
+            elif action == 'retention+':
+                interv = RetentionIntervention(interv_step, 1.0)
+            elif action == 'retention-':
+                interv = RetentionIntervention(interv_step, 0.0)
             else:
                 interv = None
                 print 'unknown intervention', action
