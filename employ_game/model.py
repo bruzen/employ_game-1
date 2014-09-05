@@ -49,12 +49,15 @@ class Society:
 
         self.neighbourhoods = [Neighbourhood(self)
                                for i in range(self.neighbourhood_count)]
+        self.distance_penalty_scale = 10000
 
     # numerical
     def create_attributes(self):
+
         attr = {}
         attr['prob_apply'] = self.rng.normal(0.5, 0.25)
         attr['distance_penalty'] = self.rng.uniform(0, 0.5)
+        attr['distance_penalty'] = self.rng.uniform(1.0, 2.0)
         attr['interview_skill'] = self.rng.normal(0.2, 0.2)
         attr['interview_skill_sd'] = self.rng.uniform(0.1, 0.4)
         attr['experience'] = 0.0
@@ -119,7 +122,7 @@ class Person:
     def does_apply(self, job):
         p = self.attributes['prob_apply']
         if job.employer.neighbourhood is not self.neighbourhood:
-            p -= self.attributes['distance_penalty']
+            p -= self.attributes['distance_penalty'] * self.society.distance_penalty_scale
         return self.society.rng.rand() < p
 
     def compute_suitability(self, job):
@@ -351,6 +354,15 @@ class Model:
 
 
 
+class SocietyParameterIntervention:
+    def __init__(self, time, parameter, value):
+        self.time = time
+        self.parameter = parameter
+        self.value = value
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            setattr(Society, self.parameter, self.value)
+
 
 
 class HighschoolCertificateIntervention:
@@ -413,6 +425,17 @@ def run(seed, *actions):
                 interv = HighschoolCertificateIntervention(presteps + 1 +
                                                            steps_per_action * i,
                                                            1.0)
+                model.interventions.append(interv)
+            elif action == 'mobility+':
+                interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
+                                        'distance_penalty_scale', 1.0)
+            elif action == 'mobility-':
+                interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
+                                        'distance_penalty_scale', 10000.0)
+            else:
+                interv = None
+                print 'unknown intervention', action
+            if interv is not None:
                 model.interventions.append(interv)
             for ii in range(steps_per_action):
                 model.step()
