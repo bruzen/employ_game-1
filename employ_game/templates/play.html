@@ -19,6 +19,9 @@
 </head>
 
 <body>
+      <div id='topbar' style='width:100%%;height:30px;'>
+         Name: <input id='username' type='text' value='%(name)s' onchange='update_name();'/>
+      </div>
       <div class='chart full' id='chart_time' style='width:100%%;height:50%%'>
         <svg style='width:100%%;height:50%%'></svg>
       </div>
@@ -32,6 +35,18 @@
     </div>
       
 <script>
+
+function update_name() {
+    name = document.getElementById('username').value
+    var data = new FormData();
+    data.append('uuid', '%(uuid)s');
+    data.append('name', name);
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/set_name', true);
+    xhr.send(data);
+}
+
 
 var chart_time;
 nv.addGraph(function() {

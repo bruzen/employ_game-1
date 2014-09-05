@@ -95,7 +95,7 @@ class Server(employ_game.swi.SimpleWebInterface):
         name = self.get_name(uuid)
         return html % dict(uuid=uuid, name=name)
 
-    def swi_setname(self, uuid, name):
+    def swi_set_name(self, uuid, name):
         names[uuid] = name
 
     def run_game(self, u):
