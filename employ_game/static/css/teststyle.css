@@ -106,3 +106,18 @@ hr {
   
 }
 
+div.score {
+    position: absolute;
+   background: #ddd;
+    right: 20px;
+    bottom: 40px;
+   margin-left:20%;
+   font-size: 20pt;
+   padding: 1em;
+   }
+   
+div.final {
+   background: yellow;
+   font-size: 30pt;
+   }
+   

@@ -56,6 +56,10 @@
       <div id='chart_race' style='display:inline-block'>
         <svg style='width:150%%;height:35%%'></svg>
       </div>
+      
+      <div class='score' id='score'>
+            
+      </div>
     
     <hr>
     <div id='logo'>
@@ -151,6 +155,20 @@ function doaction(action) {
 
 function update() {
 	data = JSON.parse(this.responseText);
+    
+    console.log(data);
+    steps = data.time[0].values.length;
+    score = data.time[0].values[steps-2].y;
+    
+    
+    console.log(steps);
+    if (steps==102) {
+            document.getElementById("score").className = 'score final';
+            document.getElementById("score").innerHTML="FINAL SCORE: <strong>"+score.toFixed(1)+"%%</strong>";
+    } else {
+            document.getElementById("score").className = 'score';
+            document.getElementById("score").innerHTML="SCORE: <strong>"+score.toFixed(1)+"%%</strong>";
+    }
     
     d3.select('#chart_time svg')
         .datum(data.time)
