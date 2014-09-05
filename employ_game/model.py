@@ -361,7 +361,9 @@ class SocietyParameterIntervention:
         self.value = value
     def apply(self, model, timestep):
         if timestep == self.time:
-            setattr(Society, self.parameter, self.value)
+            #print ('setting', self.parameter, self.value,
+            #       'from', getattr(model.society, self.parameter))
+            setattr(model.society, self.parameter, self.value)
 
 
 
@@ -428,7 +430,7 @@ def run(seed, *actions):
                 model.interventions.append(interv)
             elif action == 'mobility+':
                 interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
-                                        'distance_penalty_scale', 1.0)
+                                        'distance_penalty_scale', 0)
             elif action == 'mobility-':
                 interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
                                         'distance_penalty_scale', 10000.0)
@@ -448,12 +450,7 @@ def run(seed, *actions):
 
 
 if __name__ == '__main__':
-    print 1
-    print run(1, 'init', 'hs_diploma')['highschool']
-    print 2
-    print run(1, 'init', 'none')['highschool']
-    print run(1, 'init', 'none', 'none')['highschool']
-    print 3
+    print run(1, 'init', 'mobility+', 'none', 'none', 'none')['employment']
     1/0
 
 
