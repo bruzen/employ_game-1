@@ -15,20 +15,33 @@
     <script src="static/js/nvd3/models/line.js"></script>
     <script src="static/js/nvd3/models/lineChart.js"></script>
     <link href="static/css/nv.d3.css" rel="stylesheet" type="text/css">
+    <link href="static/css/teststyle.css" rel="stylesheet" type="text/css">
     
 </head>
 
 <body>
+
+    <div id='top_bar'>
+    <div id='title'>
+      Scores
+    </div>
+
+    </div>
+
       <div class='menu' id='menu' style='width:100%;height:30px;background:#ccc;border:0px;'>
         <input type='button' value='New Game' onclick="window.open('/play');"/>
-      </div>
-      <div class='chart full' id='chart_time' style='width:100%;height:50%;border:0px;'>
-        <svg style='width:100%;height:50%'></svg>
       </div>
 
       <div class='chart full' id='chart_bar' style='width:100%;height:50%;border:0px;'>
         <svg style='width:100%;height:50%'></svg>
       </div>
+      
+      
+    
+    <hr>
+    <div id='logo'>
+      <img src="/static/img/hi-logos.png" />
+    </div>
       
 <script>
 

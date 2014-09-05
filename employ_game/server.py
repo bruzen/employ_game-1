@@ -5,6 +5,7 @@ import uuid as uuid_package
 
 import pkgutil
 import employ_game
+
 import model
 
 
@@ -24,8 +25,12 @@ class Server(employ_game.swi.SimpleWebInterface):
             mimetype = 'text/css'
         elif fn.endswith('.png'):
             mimetype = 'image/png'
+        elif fn.endswith('.jpg'):
+            mimetype = 'image/jpg'
         elif fn.endswith('.gif'):
             mimetype = 'image/gif'
+        elif fn.endswith('.otf'):
+            mimetype = 'font/font'
         else:
             raise Exception('unknown extenstion for %s' % fn)
 
