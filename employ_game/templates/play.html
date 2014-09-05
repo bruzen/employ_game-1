@@ -32,6 +32,8 @@
         Name: <input id='username' type='text' value='%(name)s' onchange='update_name();'/>
         <input type='button' value='restart' onclick='doaction("init");'/>
         <input type='button' value='nothing' onclick='doaction("nothing");'/>
+        <input type='button' value='High Mobility' onclick='doaction("mobility+");'/>
+        <input type='button' value='Standard Mobility' onclick='doaction("mobility-");'/>
         <input type='button' value='Highshool Diploma' onclick='doaction("hs_diploma");'/>
         <input type='button' value='undo' onclick='doaction("undo")';/>
         </div>
@@ -66,7 +68,7 @@ var chart_time;
 nv.addGraph(function() {
     chart_time = nv.models.lineChart()
                     .useInteractiveGuideline(true)
-                    .forceY([-100, 100])
+                    .forceY([0, 100])
      .options({
     margin: {left: 100, bottom: 100},
     showXAxis: true,
