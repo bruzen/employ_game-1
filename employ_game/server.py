@@ -141,7 +141,19 @@ class Server(employ_game.swi.SimpleWebInterface):
                 values.append(dict(x=float(j)/substeps, y=data[key][j]))
             values.append(dict(x=maximum, y=None))
             time.append(dict(values=values, key=key, color=color, area=False))
-        return json.dumps(time)
+
+        race = []
+        for k in data.keys():
+            if k.startswith('employment_'):
+                key = k[11:]
+                color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][len(race) % 6]
+                values = []
+                for j in range(len(data[k])):
+                    values.append(dict(x=float(j)/substeps, y=data[k][j]))
+                values.append(dict(x=maximum, y=None))
+                race.append(dict(values=values, key=key, color=color, area=False))
+
+        return json.dumps(dict(time=time, race=race))
 
 
     def create_login_form(self):

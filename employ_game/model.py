@@ -331,6 +331,17 @@ class Model:
             if p.job is not None:
                 count += 1
         return float(count)/len(self.people)
+
+    def calc_feature_employment(self, feature):
+        count = 0
+        total = 0
+        for p in self.people:
+            if feature in p.features:
+                total += 1
+                if p.job is not None:
+                    count += 1
+        return float(count) / total
+
     def calc_feature_rate(self, feature):
         count = 0
         for p in self.people:
@@ -352,12 +363,16 @@ class Model:
         self.data['employment'] = []
         self.data['employer_net'] = []
         self.data['highschool'] = []
+        for race in self.society.race.keys():
+            self.data['employment_%s' % race] = []
 
     def update_data(self):
         if self.steps >= 100:
             self.data['employment'].append(self.calc_employment()*100)
             self.data['employer_net'].append(self.calc_employer_net()*0.001)
             self.data['highschool'].append(self.calc_feature_rate('highschool')*100)
+            for race in self.society.race.keys():
+                self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
 
     def get_data(self):
         return self.data
@@ -479,7 +494,7 @@ def run(seed, *actions):
 
 
 if __name__ == '__main__':
-    print run(1, 'init')['employment']
+    print run(1, 'init')['employment_black']
     1/0
 
 

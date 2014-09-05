@@ -47,6 +47,9 @@
         <svg style='width:100%%;height:65%%'></svg>
       </div>
 
+      <div class='chart full' id='chart_race'>
+        <svg style='width:50%%;height:35%%'></svg>
+      </div>
     
     <hr>
     <div id='logo'>
@@ -90,6 +93,28 @@ nv.addGraph(function() {
     return chart_time;
     });
 
+var chart_race;
+nv.addGraph(function() {
+    chart_race = nv.models.lineChart()
+                    .useInteractiveGuideline(true)
+                    .forceY([0, 100])
+     .options({
+    margin: {left: 100, bottom: 100},
+    showXAxis: true,
+    showYAxis: true,
+    transitionDuration: 250
+  })
+                    
+                    
+                    
+    chart_time.xAxis     //Chart x-axis settings
+      .axisLabel('Time')
+      .tickFormat(d3.format(',.2f'));                    
+    chart_time.yAxis    
+      .tickFormat(d3.format(',.2f'));      
+  
+    return chart_race;
+    });
 
 
 function doaction(action) {
@@ -109,9 +134,16 @@ function update() {
 	data = JSON.parse(this.responseText);
     
     d3.select('#chart_time svg')
-        .datum(data)
+        .datum(data.time)
         .call(chart_time);
     nv.utils.windowResize(chart_time.update);
+    
+    d3.select('#chart_race svg')
+        .datum(data.race)
+        .call(chart_race);
+    nv.utils.windowResize(chart_race.update);
+
+    
 }
 
 doaction('init');
