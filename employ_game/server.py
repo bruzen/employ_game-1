@@ -10,6 +10,7 @@ import model
 
 actions = {}
 seeds = {}
+names = {}
 
 class Server(employ_game.swi.SimpleWebInterface):
     def swi_static(self, *path):
@@ -60,7 +61,7 @@ class Server(employ_game.swi.SimpleWebInterface):
         time = []
         for i, uuid in enumerate(uuids):
             color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][i % 6]
-            key = uuid
+            key = names[uuid]
             values = []
             for j in range(len(data[uuid]['employment'])):
                 values.append(dict(x=float(j)/substeps, y=data[uuid]['employment'][j]))
@@ -70,7 +71,7 @@ class Server(employ_game.swi.SimpleWebInterface):
         bar = []
         for i, uuid in enumerate(uuids):
             color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][i % 6]
-            key = uuid
+            key = names[uuid]
             values = [dict(x=0, y=data[uuid]['employment'][-1]),
                       dict(x=1, y=data[uuid]['highschool'][-1]),
                       ]
@@ -79,13 +80,28 @@ class Server(employ_game.swi.SimpleWebInterface):
 
         return json.dumps(dict(time=time, bar=bar))
 
+    def get_name(self, uuid):
+        if isinstance(uuid, uuid_package.UUID):
+            uuid = str(uuid)
+        if uuid not in names:
+            name = 'User %d' % (len(names) + 1)
+            names[uuid] = name
+        else:
+            name = names[uuid]
+        return name
+
+
     def swi_play(self, uuid=None):
         if uuid is None:
             uuid = uuid_package.uuid4()
         if self.user is None:
             return self.create_login_form()
         html = pkgutil.get_data('employ_game', 'templates/play.html')
-        return html % dict(uuid=uuid)
+        name = self.get_name(uuid)
+        return html % dict(uuid=uuid, name=name)
+
+    def swi_set_name(self, uuid, name):
+        names[uuid] = name
 
     def run_game(self, u):
         # TODO: add command line argument to set this seed globally
@@ -99,6 +115,7 @@ class Server(employ_game.swi.SimpleWebInterface):
     def swi_play_json(self, uuid, action):
         maximum = 10
         substeps = 10
+        name = self.get_name(uuid)
         if not actions.has_key(uuid) or action=='init':
             actions[uuid] = []
 

@@ -80,8 +80,7 @@ hr {
   height: 0; 
   /* trick from http://css-tricks.com/examples/hrs/ */
   box-shadow: 0 0 10px 1px black;
-  margin: 30px;
-  
+  margin: 30px;  
 }
 
 
@@ -94,12 +93,12 @@ hr {
   text-align: center;
   width: 20%;
 }
-#interventions {
+#controls {
   display: inline-block;
   width: 70%;
 }
 
-#interventions>#cen {
+#controls>#cen {
   /*  centerrrring div */
   
   margin-left: auto;

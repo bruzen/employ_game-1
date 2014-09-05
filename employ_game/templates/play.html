@@ -26,9 +26,10 @@
       Interventions
     </div>
 
-    <div id='interventions'>
+    <div id='controls'>
         <!--Interventions-->
         <div id='cen'>
+        Name: <input id='username' type='text' value='%(name)s' onchange='update_name();'/>
         <input type='button' value='restart' onclick='doaction("init");'/>
         <input type='button' value='nothing' onclick='doaction("nothing");'/>
         <input type='button' value='Highshool Diploma' onclick='doaction("hs_diploma");'/>
@@ -48,6 +49,18 @@
     </div>
       
 <script>
+
+function update_name() {
+    name = document.getElementById('username').value
+    var data = new FormData();
+    data.append('uuid', '%(uuid)s');
+    data.append('name', name);
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/set_name', true);
+    xhr.send(data);
+}
+
 
 var chart_time;
 nv.addGraph(function() {
