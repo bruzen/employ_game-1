@@ -50,6 +50,16 @@ class Society:
         self.neighbourhoods = [Neighbourhood(self)
                                for i in range(self.neighbourhood_count)]
         self.distance_penalty_scale = 10000
+        self.set_racial_discrimination(0.3)
+
+    def set_racial_discrimination(self, value=1.0,
+                                  races=['black', 'hispanic', 'asian']):
+        for v in self.jobs.values():
+            for r in races:
+                v[r] = -value
+
+
+
 
     # numerical
     def create_attributes(self):
@@ -366,6 +376,16 @@ class SocietyParameterIntervention:
             setattr(model.society, self.parameter, self.value)
 
 
+class DiscriminationIntervention:
+    def __init__(self, time, value):
+        self.time = time
+        self.value = value
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            #print ('setting', self.parameter, self.value,
+            #       'from', getattr(model.society, self.parameter))
+            model.society.set_racial_discrimination(self.value)
+
 
 class HighschoolCertificateIntervention:
     def __init__(self, time, proportion):
@@ -434,6 +454,15 @@ def run(seed, *actions):
             elif action == 'mobility-':
                 interv = SocietyParameterIntervention(presteps + 1 + steps_per_action * i,
                                         'distance_penalty_scale', 10000.0)
+            elif action == 'discriminate-normal':
+                interv = DiscriminationIntervention(presteps + 1 + steps_per_action * i,
+                                        0.3)
+            elif action == 'discriminate-high':
+                interv = DiscriminationIntervention(presteps + 1 + steps_per_action * i,
+                                        2.0)
+            elif action == 'discriminate-low':
+                interv = DiscriminationIntervention(presteps + 1 + steps_per_action * i,
+                                        0.0)
             else:
                 interv = None
                 print 'unknown intervention', action
@@ -450,7 +479,7 @@ def run(seed, *actions):
 
 
 if __name__ == '__main__':
-    print run(1, 'init', 'mobility+', 'none', 'none', 'none')['employment']
+    print run(1, 'init')['employment']
     1/0
 
 
