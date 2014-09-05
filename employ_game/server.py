@@ -7,7 +7,10 @@ import pkgutil
 import employ_game
 import model
 
-actions = {}
+
+from collections import OrderedDict
+
+actions = OrderedDict()
 seeds = {}
 names = {}
 
