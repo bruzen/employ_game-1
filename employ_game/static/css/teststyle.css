@@ -121,3 +121,38 @@ div.final {
    font-size: 30pt;
    }
    
+div#grid {
+    background: #ddd;
+    display: inline-block;
+    left: 20px;
+    top: 100px;
+    width: 300px;
+    height: 300px;    
+   }
+
+div#chart_time {
+    display: inline-block;
+    width: 50%;
+    height: 300px;    
+   }
+   
+div#chart_race {
+    display: inline-block;
+    width: 50%;
+    height: 200px;    
+   }
+
+div#chart_race_pie {
+    display: inline-block;
+    width: 30%;
+    height: 200px;    
+   }
+   
+div#logo {
+    width:100%;
+}   
+   
+   
+#grid svg g circle {
+    stroke-width:0px;
+}

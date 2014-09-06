@@ -2,7 +2,10 @@ import numpy as np
 from collections import OrderedDict
 
 class Society:
-    neighbourhood_count = 3
+    neighbourhood_rows = 2
+    neighbourhood_cols = 2
+    neighbourhood_count = neighbourhood_rows * neighbourhood_cols
+
     def __init__(self, rng):
         self.rng = rng
         self.gender = OrderedDict(male=0.5, female=0.5)
@@ -122,16 +125,26 @@ class Society:
         probability = all / (all + (pF / (1-pF)) * none)
         return probability
 
+def color_blend(c1, c2, blend):
+    if blend <= 0:
+        c = c1
+    elif blend >= 1.0:
+        c = c2
+    else:
+        c = c1 * (1-blend) + c2 * (blend)
+    return '#%02x%02x%02x' % (c[0]*255, c[1]*255, c[2]*255)
 
 class Person:
     def __init__(self, society):
         self.society = society
         self.age = 16
         self.job = None
+        self.job_length = 0.0
         self.income = 0
         self.features = society.create_features()
         self.attributes = society.create_attributes()
         self.neighbourhood = society.rng.choice(society.neighbourhoods)
+        self.location = self.neighbourhood.allocate_location()
 
     def does_apply(self, job):
         p = self.attributes['prob_apply']
@@ -146,6 +159,14 @@ class Person:
         score += self.society.job_income[job.type][0]
         return score
 
+    def get_color(self):
+        if self.job is None:
+            return color_blend(np.array([1.0, 0.5, 0.5]), np.array([1.0, 0.0, 0.0]),
+                               self.job_length/5.0)
+        else:
+            return color_blend(np.array([0.5, 0.5, 1.0]), np.array([0.0, 0.0, 1.0]),
+                               self.job_length/5.0)
+
 
 
 
@@ -155,10 +176,14 @@ class Employer:
         self.society = society
         self.jobs = [Job(society, self) for i in range(self.jobs_per_employer)]
         self.neighbourhood = society.rng.choice(society.neighbourhoods)
+        self.location = self.neighbourhood.allocate_location()
         self.total_hiring_cost = 0
         self.total_salary = 0
         self.total_productivity = 0
         self.total_net = 0
+
+    def get_color(self):
+        return '#888'
 
     def step(self, dt):
         self.hiring_cost = 0
@@ -210,6 +235,18 @@ class Job:
 class Neighbourhood:
     def __init__(self, society):
         self.society = society
+        self.rows = 7
+        self.cols = 7
+        x, y = np.meshgrid(np.arange(self.cols), np.arange(self.rows))
+        self.locations = zip(x.flatten(),y.flatten())
+    def allocate_location(self):
+        if len(self.locations) == 0:
+            print 'warning: not enough space in neighbourhood'
+            return (0,0)
+        index = self.society.rng.randint(len(self.locations))
+        return self.locations.pop(index)
+    def free_location(self, loc):
+        self.locations.append(loc)
 
 
 class Model:
@@ -311,19 +348,21 @@ class Model:
         assert person.job is not None
         person.job.employee = None
         person.job = None
+        person.job_length = 0.0
 
 
 
     def increase_age(self):
         for p in self.people:
             p.age += self.years_per_step
+            p.job_length += self.years_per_step
             if p.job is not None:
-                p.job_length += self.years_per_step
                 p.attributes['experience'] += self.years_per_step
 
     def remove_older(self):
         for p in self.people:
             if p.age > self.max_age:
+                p.neighbourhood.free_location(p.location)
                 self.people.remove(p)
                 if p.job is not None:
                     p.job.employee = None
@@ -380,7 +419,29 @@ class Model:
                 self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
                 self.data['proportion_%s' % race].append(self.calc_feature_rate(race)*100)
 
+    def get_grid(self):
+        grid = []
+        for e in self.employers:
+            x, y = self.get_location(e)
+            color = e.get_color()
+            item = dict(type='employer', x=x, y=y, color=color)
+            grid.append(item)
+        for p in self.people:
+            x, y = self.get_location(p)
+            color = p.get_color()
+            item = dict(type='person', x=x, y=y, color=color)
+            grid.append(item)
+        return grid
+
+    def get_location(self, item):
+        xx, yy = item.location
+        n_index = self.society.neighbourhoods.index(item.neighbourhood)
+        x = (n_index % self.society.neighbourhood_cols) * item.neighbourhood.cols + xx
+        y = (n_index / self.society.neighbourhood_cols) * item.neighbourhood.rows + yy
+        return x, y
+
     def get_data(self):
+        self.data['grid'] = self.get_grid()
         return self.data
 
 class RetentionIntervention:

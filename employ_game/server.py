@@ -158,8 +158,9 @@ class Server(employ_game.swi.SimpleWebInterface):
                 race_pie.append(dict(label=key, value=p[-1], color=color))
 
 
+        grid = data['grid']
 
-        return json.dumps(dict(time=time, race=race, race_pie=race_pie))
+        return json.dumps(dict(time=time, race=race, race_pie=race_pie, grid=grid))
 
 
     def create_login_form(self):

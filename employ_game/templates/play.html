@@ -44,17 +44,21 @@
         </div>
     </div>
     </div>
+    
+      <div id='grid'>
+        <svg></svg>
+      </div>
 
       <div class='chart full' id='chart_time'>
-        <svg style='width:100%%;height:50%%'></svg>
+        <svg></svg>
       </div>
 
-      <div id='chart_race_pie' style='display:inline-block'>
-        <svg style='width:100%%;height:35%%'></svg>
+      <div id='chart_race_pie'>
+        <svg></svg>
       </div>
 
-      <div id='chart_race' style='display:inline-block'>
-        <svg style='width:150%%;height:35%%'></svg>
+      <div id='chart_race'>
+        <svg></svg>
       </div>
       
       <div class='score' id='score'>
@@ -184,10 +188,55 @@ function update() {
         .datum(data.race_pie)
         .call(chart_race_pie);
     nv.utils.windowResize(chart_race_pie.update);
-    
+
+    update_grid(data.grid);    
 }
 
 doaction('init');
+
+function update_grid(grid_data) {
+    var width = 300.0;
+    var height = 300.0;
+    var cols = 14;
+    var rows = 14;
+    
+    svg = d3.select('#grid svg')
+    svg.selectAll("*").remove()    
+    grid = svg.append('g');
+
+    var dx = width / cols;
+    var dy = height / rows;
+    if (dy < dx) dx = dy;
+    else dy = dx;
+    
+    
+    
+    for (var i=0; i<grid_data.length; i++) {
+        
+        if (grid_data[i].type == 'person') {
+            x = (grid_data[i].x + 0.5) * dx;
+            y = (grid_data[i].y + 0.5) * dy;
+            transform = 'translate(' + x + ' ' + y + ')';
+            grid.append('circle')
+                         .attr('r', dx/2-1)
+                         .attr('fill', grid_data[i].color)
+                         .attr('transform', transform);
+        } else {
+            x = (grid_data[i].x) * dx;
+            y = (grid_data[i].y) * dy;
+            transform = 'translate(' + x + ' ' + y + ')';
+            grid.append('rect')
+                .attr('width', dx)
+                .attr('height', dx)
+                .attr('fill', grid_data[i].color)
+                .attr('transform', transform);
+                
+        
+        
+        }
+    }
+}    
+
 
 </script>      
       
