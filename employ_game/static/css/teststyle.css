@@ -156,3 +156,16 @@ div#logo {
 #grid svg g circle {
     stroke-width:0px;
 }
+
+.tooltip {
+    background: white;
+    border: solid 1px black;
+    font-size: 10pt;
+    padding: 5px;
+}
+
+.tooltip h1 {
+    font-size:14pt;
+    padding: 0px;
+    margin: 0px;
+}

@@ -167,6 +167,13 @@ class Person:
             return color_blend(np.array([0.5, 0.5, 1.0]), np.array([0.0, 0.0, 1.0]),
                                self.job_length/5.0)
 
+    def get_info(self):
+        text = '<h1>Person:</h1>'
+        text += ', '.join([f for f in self.features if not f.startswith('no_')])
+        text += '<br/>%3.1f years old' % self.age
+        status = 'employed' if self.job is not None else 'unemployed'
+        text +='<br/>%s for %2.1f years' % (status, self.job_length)
+        return text
 
 
 
@@ -184,6 +191,10 @@ class Employer:
 
     def get_color(self):
         return '#888'
+    def get_info(self):
+        text = '<h1>Employer:</h1>'
+        text += 'net: <strong>$%5.2f</strong>' % self.total_net
+        return text
 
     def step(self, dt):
         self.hiring_cost = 0
@@ -424,12 +435,12 @@ class Model:
         for e in self.employers:
             x, y = self.get_location(e)
             color = e.get_color()
-            item = dict(type='employer', x=x, y=y, color=color)
+            item = dict(type='employer', x=x, y=y, color=color, info=e.get_info())
             grid.append(item)
         for p in self.people:
             x, y = self.get_location(p)
             color = p.get_color()
-            item = dict(type='person', x=x, y=y, color=color)
+            item = dict(type='person', x=x, y=y, color=color, info=p.get_info())
             grid.append(item)
         return grid
 

@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     
     <script src="static/js/d3.v3.js", type="text/javascript"></script>
+    <script src="static/js/d3.tip.js", type="text/javascript"></script>
     <script src="static/js/nv.d3.js", type="text/javascript"></script>
     <script src="static/js/nvd3/tooltip.js"></script>
     <script src="static/js/nvd3/utils.js"></script>
@@ -212,6 +213,11 @@ function update_grid(grid_data) {
     
     
     for (var i=0; i<grid_data.length; i++) {
+    
+        tip = d3.tip().attr('class', 'tooltip')
+                      .html(grid_data[i].info)
+                      .direction('e');
+        svg.call(tip);
         
         if (grid_data[i].type == 'person') {
             x = (grid_data[i].x + 0.5) * dx;
@@ -220,7 +226,10 @@ function update_grid(grid_data) {
             grid.append('circle')
                          .attr('r', dx/2-1)
                          .attr('fill', grid_data[i].color)
-                         .attr('transform', transform);
+                         .attr('transform', transform)
+                         .on('mouseover', tip.show)
+                         .on('mouseout', tip.hide);
+            
         } else {
             x = (grid_data[i].x) * dx;
             y = (grid_data[i].y) * dy;
@@ -229,7 +238,9 @@ function update_grid(grid_data) {
                 .attr('width', dx)
                 .attr('height', dx)
                 .attr('fill', grid_data[i].color)
-                .attr('transform', transform);
+                .attr('transform', transform)
+                .on('mouseover', tip.show)
+                 .on('mouseout', tip.hide);
                 
         
         
