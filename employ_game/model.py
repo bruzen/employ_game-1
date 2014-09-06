@@ -169,7 +169,8 @@ class Person:
 
     def get_info(self):
         text = '<h1>Person:</h1>'
-        text += ', '.join([f for f in self.features if not f.startswith('no_')])
+        visible = [x[0] for x in self.society.probs]
+        text += ', '.join([f for f in self.features if f in visible])
         text += '<br/>%3.1f years old' % self.age
         status = 'employed' if self.job is not None else 'unemployed'
         text +='<br/>%s for %2.1f years' % (status, self.job_length)
