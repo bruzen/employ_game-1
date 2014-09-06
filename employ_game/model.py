@@ -19,35 +19,48 @@ class Society:
         self.probs = [
             #('prison', dict(overall=0.4, male=0.2, female=0.1, white=0.2,
             #               black=0.3, black_male=0.9)),
-            ('prison', OrderedDict(overall=0.3)),
+            ('prison', OrderedDict(overall=0.1)),
             ('highschool', OrderedDict(overall=0.4)),
             ]
 
         self.jobs = {
-            'service': dict(highschool=0.5),
-            'trade': dict(no_highschool=-0.5, prison=None),
-            'security': dict(no_highschool=None, prison=None, experience=0.5),
+            'service_low': dict(highschool=0.25, experience_service=0.5),
+            'service_high': dict(no_highschool=None, experience_service=0.5),
+            'manufacturing_low': dict(highschool=0.25, experience_manufacturing=0.5),
+            'manufacturing_high': dict(no_highschool=None, experience_manufacturing=0.5),
             }
-        self.job_commonality = OrderedDict(service=0.4, security=0.3, trade=0.3)
+        self.job_sector = {
+            'service_low': 'service',
+            'service_high': 'service',
+            'manufacturing_high': 'manufacturing',
+            'manufacturing_low': 'manufacturing',
+            }
+        self.job_commonality = OrderedDict(service_low=0.3, service_high=0.3,
+                                           manufacturing_low=0.2, manufacturing_high=0.2)
         self.job_income = {
-            'service': (20000, 1000),   # starting, annual raise
-            'security': (40000, 2000),
-            'trade': (30000, 2000),
+            'service_low': (13000, 1300),   # starting, annual raise
+            'service_high': (22000, 3600),   # starting, annual raise
+            'manufacturing_low': (14000, 900),   # starting, annual raise
+            'manufacturing_high': (27000, 3500),   # starting, annual raise
         }
         self.job_retention = {
-            'service': [0.2, 0.6],
-            'security': [0.7, 0.8],
-            'trade': [0.4, 0.8],
+            'service_low': [0.5, 0.8],    # first year, next years
+            'service_high': [0.5, 0.8],
+            'manufacturing_low': [0.5, 0.8],
+            'manufacturing_high': [0.5, 0.8],
             }
         self.job_productivity = {
-            'service': (50000, 1),
-            'security': (80000, 0.5),
-            'trade': (60000, 0.5),
+            # exponential curves take approx 3*exp_time to reach asymptote
+            'service_low': (22000, 0.5),    # final asymptote, exp_time
+            'service_high': (57000, 1),    # final asymptote, exp_time
+            'manufacturing_low': (27000, 0.5),    # final asymptote, exp_time
+            'manufacturing_high': (63000, 1),    # final asymptote, exp_time
         }
         self.job_hiring = {
-            'service': 5000,
-            'security': 20000,
-            'trade': 30000,
+            'service_low': 5000,
+            'service_high': 5000,
+            'manufacturing_low': 5000,
+            'manufacturing_high': 5000,
         }
 
         self.neighbourhoods = [Neighbourhood(self)
@@ -78,6 +91,8 @@ class Society:
         attr['interview_skill'] = self.rng.normal(0.2, 0.2)
         attr['interview_skill_sd'] = self.rng.uniform(0.1, 0.4)
         attr['experience'] = 0.0
+        attr['experience_service'] = 0.0
+        attr['experience_manufacturing'] = 0.0
         return attr
 
     # binary
@@ -174,6 +189,9 @@ class Person:
         text += '<br/>%3.1f years old' % self.age
         status = 'employed' if self.job is not None else 'unemployed'
         text +='<br/>%s for %2.1f years' % (status, self.job_length)
+        text +='<br/>experience: %2.1f years (%2.1f service, %2.1f manufacturing)' % (self.attributes['experience'],
+                                                                                      self.attributes['experience_service'],
+                                                                                      self.attributes['experience_manufacturing'])
         return text
 
 
@@ -370,6 +388,8 @@ class Model:
             p.job_length += self.years_per_step
             if p.job is not None:
                 p.attributes['experience'] += self.years_per_step
+                sector = self.society.job_sector[p.job.type]
+                p.attributes['experience_%s' % sector] += self.years_per_step
 
     def remove_older(self):
         for p in self.people:
