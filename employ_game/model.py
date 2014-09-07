@@ -355,7 +355,7 @@ class Model:
                                          a.attributes['interview_skill_sd'])
                 interview[(job, a)] = score
 
-        iterations = 10
+        iterations = 4
         for i in range(iterations):
             all_offers = OrderedDict()
             for job, applicants in applications.items():
