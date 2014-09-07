@@ -512,7 +512,7 @@ class Model:
             self.data['proportion_18plus'].append(self.calc_attribute_rate('age', threshold=18)*100)
             self.data['cost_hiring'].append(sum([e.hiring_cost for e in self.employers]))
             self.data['cost_salary'].append(sum([e.salary for e in self.employers]))
-            self.data['production'].append(sum([e.production for e in self.employers]))
+            self.data['production'].append(sum([e.productivity for e in self.employers]))
             #for race in self.society.race.keys():
             #    self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
             #    self.data['proportion_%s' % race].append(self.calc_feature_rate(race)*100)

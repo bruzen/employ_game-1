@@ -150,6 +150,23 @@ nv.addGraph(function() {
     return chart_race_pie;   
   })
                     
+var chart_money;
+nv.addGraph(function() {
+    chart_money = nv.models.multiBarChart()
+       .reduceXTicks(false)   //If 'false', every single x-axis tick label will be rendered.
+       .rotateLabels(0)      //Angle to rotate x-axis labels.
+       .showControls(false)   //Allow user to switch between 'Grouped' and 'Stacked' mode.
+       .groupSpacing(0.1)    //Distance between each group of bars.
+       .showXAxis(false)
+       .stacked(true);
+       
+    chart_money.xAxis
+        .tickFormat(d3.format(',f'));
+    chart_money.yAxis
+        .tickFormat(d3.format(',.1f'));
+       
+    return chart_money;   
+  })
     
     
 
@@ -198,6 +215,12 @@ function update() {
         .call(chart_race_pie);
     nv.utils.windowResize(chart_race_pie.update);
 
+    console.log(data.money);
+    d3.select('#chart_money svg')
+        .datum(data.money)
+        .call(chart_money);
+    nv.utils.windowResize(chart_money.update);
+    
     update_grid(data.grid);    
 }
 

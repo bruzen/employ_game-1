@@ -161,10 +161,10 @@ class Server(employ_game.swi.SimpleWebInterface):
         grid = data['grid']
 
         money = []
-        money.append(dict(key='production', values=[100,0]))
+        money.append(dict(key='production', values=[{'x':0, 'y':100}, {'x':1, 'y':0}]))
+        money.append(dict(key='hiring', values=[{'x':0, 'y':0}, {'x':1, 'y':40}]))
+        money.append(dict(key='salary', values=[{'x':0, 'y':0}, {'x':1, 'y':50}]))
 
-        money.append(dict(key='hiring', values=[0,40]))
-        money.append(dict(key='salary', values=[0,50]))
 
 
         return json.dumps(dict(time=time, race=race, race_pie=race_pie, grid=grid, money=money))
