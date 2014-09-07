@@ -253,8 +253,10 @@ class Employer:
                 self.salary += salary * dt
                 j.employee.income += salary * dt
 
+                t = j.employee.attributes['experience_'+self.society.job_sector[j.type]]
+
                 prod_max, prod_time = self.society.job_productivity[j.type]
-                prod = prod_max * (1-np.exp(-j.employee.job_length/prod_time))
+                prod = prod_max * (1-np.exp(-t/prod_time))
                 self.productivity += prod * dt
 
                 if j.employee.job_length == 0.0:
@@ -588,6 +590,32 @@ class SocietyParameterIntervention:
             model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
             model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
 
+class SectorMobilityIntervention:
+    def __init__(self, time, value,
+                 cost_sunk, cost_fixed, public_proportion):
+        self.time = time
+        self.value = value
+        self.cost_sunk = cost_sunk
+        self.cost_fixed = cost_fixed
+        #self.cost_variable = cost_variable
+        self.public_proportion = public_proportion
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            model.society.interv_public += self.public_proportion * self.cost_sunk
+            model.society.interv_private += (1-self.public_proportion) * self.cost_sunk
+
+            for type, values in model.society.jobs.items():
+                sector = model.society.job_sector[type]
+                if sector == 'service':
+                    values['employment_manufactoring'] = self.value
+                elif sector == 'manufacturing':
+                    values['employment_service'] = self.value
+            #model.society.get_job_cost_public += self.public_proportion * self.cost_variable
+            #model.society.get_job_cost_private += (1 - self.public_proportion) * self.cost_variable
+        elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
+
 
 class DiscriminationIntervention:
     def __init__(self, time, value):
@@ -741,6 +769,12 @@ def run(seed, *actions):
                 interv = ChildcareIntervention(interv_step, 0.5, 4000, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
             elif action == 'childcare-high':
                 interv = ChildcareIntervention(interv_step, 0.8, 4000, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'sectormobility-low':
+                interv = SectorMobilityIntervention(interv_step, 0.2, cost_sunk=20000, cost_fixed=5000, public_proportion=0.5)
+            elif action == 'sectormobility-med':
+                interv = SectorMobilityIntervention(interv_step, 0.5, cost_sunk=40000, cost_fixed=15000, public_proportion=0.5)
+            elif action == 'sectormobility-high':
+                interv = SectorMobilityIntervention(interv_step, 0.8, cost_sunk=80000, cost_fixed=15000, public_proportion=0.5)
             else:
                 interv = None
                 print 'unknown intervention', action

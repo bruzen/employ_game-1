@@ -38,20 +38,17 @@
         <input type='button' value='Low Mobility' onclick='doaction("mobility-low");'/>
         <input type='button' value='Low Wraparound' onclick='doaction("childcare-low");'/>
         <input type='button' value='Low Highschool' onclick='doaction("highschool-low");'/>
+        <input type='button' value='Low Sector' onclick='doaction("sectormobility-low");'/>
         <br/>
         <input type='button' value='Med Mobility' onclick='doaction("mobility-med");'/>
         <input type='button' value='Med Wraparound' onclick='doaction("childcare-med");'/>
         <input type='button' value='Med Highschool' onclick='doaction("highschool-med");'/>
+        <input type='button' value='Med Sector' onclick='doaction("sectormobility-med");'/>
         <br/>
         <input type='button' value='High Mobility' onclick='doaction("mobility-high");'/>
         <input type='button' value='High Wraparound' onclick='doaction("childcare-high");'/>
         <input type='button' value='High Highschool' onclick='doaction("highschool-high");'/>
-        <br/>
-        <input type='button' value='Normal Discrimination' onclick='doaction("discriminate-normal");'/>
-        <input type='button' value='High Discrimination' onclick='doaction("discriminate-high");'/>
-        <input type='button' value='Low Discrimination' onclick='doaction("discriminate-low");'/>
-        <input type='button' value='Increase Retention' onclick='doaction("retention+");'/>
-        <input type='button' value='Decrease Retention' onclick='doaction("retention-");'/>
+        <input type='button' value='High Sector' onclick='doaction("sectormobility-high");'/>
         </div>
     </div>
     </div>
@@ -167,6 +164,7 @@ nv.addGraph(function() {
        .groupSpacing(0.1)    //Distance between each group of bars.
        .showXAxis(true)
        .margin({left:150, bottom:30})
+       .transitionDuration(10)
        .stacked(true);
        
        
