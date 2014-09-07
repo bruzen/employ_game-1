@@ -160,7 +160,14 @@ class Server(employ_game.swi.SimpleWebInterface):
 
         grid = data['grid']
 
-        return json.dumps(dict(time=time, race=race, race_pie=race_pie, grid=grid))
+        money = []
+        money.append(dict(key='production', values=[100,0]))
+
+        money.append(dict(key='hiring', values=[0,40]))
+        money.append(dict(key='salary', values=[0,50]))
+
+
+        return json.dumps(dict(time=time, race=race, race_pie=race_pie, grid=grid, money=money))
 
 
     def create_login_form(self):

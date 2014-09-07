@@ -412,6 +412,7 @@ class Model:
                 p.attributes['experience'] += self.years_per_step
                 sector = self.society.job_sector[p.job.type]
                 p.attributes['experience_%s' % sector] += self.years_per_step
+            p.attributes['age'] = p.age
 
     def remove_older(self):
         for p in self.people:
@@ -439,10 +440,27 @@ class Model:
                     count += 1
         return float(count) / total
 
+    def calc_attribute_employment(self, attribute, threshold):
+        count = 0
+        total = 0
+        for p in self.people:
+            if p.attributes[attribute] >= threshold:
+                total += 1
+                if p.job is not None:
+                    count += 1
+        return float(count) / total
+
     def calc_feature_rate(self, feature):
         count = 0
         for p in self.people:
             if feature in p.features:
+                count += 1
+        return float(count)/len(self.people)
+
+    def calc_attribute_rate(self, attribute, threshold):
+        count = 0
+        for p in self.people:
+            if p.attributes[attribute] >= threshold:
                 count += 1
         return float(count)/len(self.people)
 
@@ -460,18 +478,44 @@ class Model:
         self.data['employment'] = []
         self.data['employer_net'] = []
         self.data['highschool'] = []
-        for race in self.society.race.keys():
-            self.data['employment_%s' % race] = []
-            self.data['proportion_%s' % race] = []
+        self.data['employment_childcare'] = []
+        self.data['employment_nohighschool'] = []
+        self.data['employment_2_or_more_years'] = []
+        self.data['employment_18plus'] = []
+        self.data['proportion_childcare'] = []
+        self.data['proportion_nohighschool'] = []
+        self.data['proportion_2_or_more_years'] = []
+        self.data['proportion_18plus'] = []
+
+        self.data['cost_hiring'] = []
+        self.data['cost_salary'] = []
+        self.data['production'] = []
+        self.data['cost_intervention_public'] = []
+        self.data['cost_intervention_private'] = []
+
+        #for race in self.society.race.keys():
+        #    self.data['employment_%s' % race] = []
+        #    self.data['proportion_%s' % race] = []
 
     def update_data(self):
         if self.steps >= 100:
             self.data['employment'].append(self.calc_employment()*100)
             self.data['employer_net'].append(self.calc_employer_net()*0.001)
             self.data['highschool'].append(self.calc_feature_rate('highschool')*100)
-            for race in self.society.race.keys():
-                self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
-                self.data['proportion_%s' % race].append(self.calc_feature_rate(race)*100)
+            self.data['employment_childcare'].append(self.calc_feature_employment('childcare')*100)
+            self.data['employment_nohighschool'].append(self.calc_feature_employment('no_highschool')*100)
+            self.data['employment_2_or_more_years'].append(self.calc_attribute_employment('experience', threshold=2.0)*100)
+            self.data['employment_18plus'].append(self.calc_attribute_employment('age', threshold=18)*100)
+            self.data['proportion_childcare'].append(self.calc_feature_rate('childcare')*100)
+            self.data['proportion_nohighschool'].append(self.calc_feature_rate('no_highschool')*100)
+            self.data['proportion_2_or_more_years'].append(self.calc_attribute_rate('experience', threshold=2.0)*100)
+            self.data['proportion_18plus'].append(self.calc_attribute_rate('age', threshold=18)*100)
+            self.data['cost_hiring'].append(sum([e.hiring_cost for e in self.employers]))
+            self.data['cost_salary'].append(sum([e.salary for e in self.employers]))
+            self.data['production'].append(sum([e.production for e in self.employers]))
+            #for race in self.society.race.keys():
+            #    self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
+            #    self.data['proportion_%s' % race].append(self.calc_feature_rate(race)*100)
 
     def get_grid(self):
         grid = []
