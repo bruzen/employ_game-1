@@ -6,6 +6,9 @@ class Society:
     neighbourhood_cols = 2
     neighbourhood_count = neighbourhood_rows * neighbourhood_cols
 
+    childcare_cost = 4000
+    transportation_cost = 2000
+
     def __init__(self, rng):
         self.rng = rng
         self.gender = OrderedDict(male=0.5, female=0.5)
@@ -19,15 +22,16 @@ class Society:
         self.probs = [
             #('prison', dict(overall=0.4, male=0.2, female=0.1, white=0.2,
             #               black=0.3, black_male=0.9)),
-            ('prison', OrderedDict(overall=0.1)),
+            ('prison', OrderedDict(overall=0.02)),
+            ('childcare', OrderedDict(overall=0.4)),
             ('highschool', OrderedDict(overall=0.4)),
             ]
 
         self.jobs = {
-            'service_low': dict(highschool=0.25, experience_service=0.5),
-            'service_high': dict(no_highschool=None, experience_service=0.5),
-            'manufacturing_low': dict(highschool=0.25, experience_manufacturing=0.5),
-            'manufacturing_high': dict(no_highschool=None, experience_manufacturing=0.5),
+            'service_low': dict(highschool=0.5, experience_service=1),
+            'service_high': dict(no_highschool=None, experience_service=1, baseline=-3),
+            'manufacturing_low': dict(highschool=0.5, experience_manufacturing=1),
+            'manufacturing_high': dict(no_highschool=None, experience_manufacturing=1, baseline=-3),
             }
         self.job_sector = {
             'service_low': 'service',
@@ -160,8 +164,21 @@ class Person:
         self.attributes = society.create_attributes()
         self.neighbourhood = society.rng.choice(society.neighbourhoods)
         self.location = self.neighbourhood.allocate_location()
+        self.local_preference_bonus = 1000
+        self.childcare_support = 0
 
     def does_apply(self, job):
+        salary = self.society.job_income[job.type][0]
+        reservation_wage = 11000
+        if 'childcare' in self.features:
+            reservation_wage += self.society.childcare_cost
+            reservation_wage -= self.childcare_support
+        if self.neighbourhood is not job.employer.neighbourhood:
+            reservation_wage += self.society.transportation_cost
+        if reservation_wage > salary:
+            return False
+
+
         p = self.attributes['prob_apply']
         if job.employer.neighbourhood is not self.neighbourhood:
             p -= self.attributes['distance_penalty'] * self.society.distance_penalty_scale
@@ -170,7 +187,9 @@ class Person:
     def compute_suitability(self, job):
         score = 0
         if self.neighbourhood is job.employer.neighbourhood:
-            score += 5000
+            score += self.local_preference_bonus
+        else:
+            score -= self.society.transportation_cost
         score += self.society.job_income[job.type][0]
         return score
 
@@ -189,6 +208,7 @@ class Person:
         text += '<br/>%3.1f years old' % self.age
         status = 'employed' if self.job is not None else 'unemployed'
         text +='<br/>%s for %2.1f years' % (status, self.job_length)
+        if self.job: text += ' at %s' % self.job.type
         text +='<br/>experience: %2.1f years (%2.1f service, %2.1f manufacturing)' % (self.attributes['experience'],
                                                                                       self.attributes['experience_service'],
                                                                                       self.attributes['experience_manufacturing'])
@@ -253,7 +273,9 @@ class Job:
         for feature, value in self.society.jobs[self.type].items():
             if value is None and feature in person.features:
                 return -np.inf
-            if feature in person.features:
+            if feature == 'baseline':
+                total += value
+            elif feature in person.features:
                 total += value
             elif feature in person.attributes:
                 total += value * person.attributes[feature]
@@ -509,6 +531,29 @@ class DiscriminationIntervention:
             #       'from', getattr(model.society, self.parameter))
             model.society.set_racial_discrimination(self.value)
 
+class ChildcareIntervention:
+    def __init__(self, time, proportion, value):
+        self.time = time
+        self.proportion = proportion
+        self.value = value
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            for p in model.people:
+                if 'childcare' in p.features:
+                    if model.rng.rand() < self.proportion:
+                        p.childcare_support = self.value
+                    else:
+                        p.childcare_support = 0
+        elif timestep > self.time:
+            for p in model.people:
+                if p.age < 16 + Model.years_per_step * 2:
+                    if 'childcare' in p.features:
+                        if model.rng.rand() < self.proportion:
+                            p.childcare_support = self.value
+                        else:
+                            p.childcare_support = 0
+
+
 
 class HighschoolCertificateIntervention:
     def __init__(self, time, proportion):
@@ -586,6 +631,12 @@ def run(seed, *actions):
                 interv = RetentionIntervention(interv_step, 1.0)
             elif action == 'retention-':
                 interv = RetentionIntervention(interv_step, 0.0)
+            elif action == 'childcare-low':
+                interv = ChildcareIntervention(interv_step, 0.0, 0)
+            elif action == 'childcare-med':
+                interv = ChildcareIntervention(interv_step, 0.4, 4000)
+            elif action == 'childcare-high':
+                interv = ChildcareIntervention(interv_step, 0.8, 4000)
             else:
                 interv = None
                 print 'unknown intervention', action
