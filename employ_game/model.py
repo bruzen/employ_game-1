@@ -582,6 +582,11 @@ class SocietyParameterIntervention:
             #print ('setting', self.parameter, self.value,
             #       'from', getattr(model.society, self.parameter))
             setattr(model.society, self.parameter, self.value)
+            model.society.get_job_cost_public += self.public_proportion * self.cost_variable
+            model.society.get_job_cost_private += (1 - self.public_proportion) * self.cost_variable
+        elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
 
 
 class DiscriminationIntervention:
@@ -593,11 +598,6 @@ class DiscriminationIntervention:
             #print ('setting', self.parameter, self.value,
             #       'from', getattr(model.society, self.parameter))
             model.society.set_racial_discrimination(self.value)
-            model.society.get_job_cost_public += self.public_proportion * self.cost_variable
-            model.society.get_job_cost_private += (1 - self.public_proportion) * self.cost_variable
-        elif timestep > self.time:
-            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
-            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
 
 class ChildcareIntervention:
     def __init__(self, time, proportion, value,
