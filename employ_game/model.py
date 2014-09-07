@@ -775,6 +775,10 @@ def memoize(f):
             return ret
     return memodict(f)
 
+def clear_cache():
+    model_cache.clear()
+    run.clear()  # clear the memoized cache too
+
 
 model_cache = {}
 import copy
@@ -877,7 +881,14 @@ def run(seed, *actions):
 
 
 if __name__ == '__main__':
-    print run(1, 'init')['employment_black']
+    print 1
+    run(1, 'init')
+    print 2
+    clear_cache()
+    print 3
+    run(1, 'init')
+    print 4
+
     1/0
 
 

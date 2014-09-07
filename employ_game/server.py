@@ -17,6 +17,14 @@ seeds = {}
 names = {}
 
 class Server(employ_game.swi.SimpleWebInterface):
+
+    def clear(self):
+        actions.clear()
+        action_texts.clear()
+        seeds.clear()
+        names.clear()
+        model.clear_cache()
+
     def swi_static(self, *path):
         if self.user is None: return
         fn = os.path.join('static', *path)
@@ -54,7 +62,11 @@ class Server(employ_game.swi.SimpleWebInterface):
         html = pkgutil.get_data('employ_game', 'templates/overview.html')
         return html
 
-    def swi_overview_json(self):
+    def swi_overview_json(self, command=None):
+
+        if command == 'clear':
+            self.clear()
+
         maximum = 10
         substeps = 10
 

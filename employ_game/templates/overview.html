@@ -30,6 +30,7 @@
 
       <div class='menu' id='menu' style='width:100%;height:30px;background:#ccc;border:0px;'>
         <input type='button' value='New Game' onclick="window.open('/play');"/>
+        <input type='button' value='Clear All' onclick="clear_all();"/>
       </div>
 
       <div class='chart full' id='chart_bar' style='width:100%;height:50%;border:0px;'>
@@ -43,6 +44,16 @@
     </div>
       
 <script>
+
+function clear_all() {
+    var data = new FormData();
+    data.append('command', 'clear');
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/overview.json', true);
+    xhr.onload = update_overview;
+    xhr.send(data);
+}
+
 
 var bar_labels = ['employment', 'highschool', 'efficiency'];
 
@@ -107,7 +118,7 @@ nv.addGraph(function() {
     showXAxis: true,
     showYAxis: true,
     showControls: false,
-    showLegend: false,
+    showLegend: true,
     reduceXTicks: false,
     transitionDuration: 250
   })
