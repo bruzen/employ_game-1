@@ -34,10 +34,10 @@ class Society:
             ]
 
         self.jobs = {
-            'service_low': dict(highschool=0.5, experience_service=1),
-            'service_high': dict(no_highschool=None, experience_service=1, baseline=-3),
-            'manufacturing_low': dict(highschool=0.5, experience_manufacturing=1),
-            'manufacturing_high': dict(no_highschool=None, experience_manufacturing=1, baseline=-3),
+            'service_low': dict(no_highschool=None, highschool=0.5, experience_service=1),
+            'service_high': dict(no_highschool=None, highschool=0.5, experience_service=1, baseline=-3),
+            'manufacturing_low': dict(no_highschool=None, highschool=0.5, experience_manufacturing=1),
+            'manufacturing_high': dict(no_highschool=None, highschool=0.5, experience_manufacturing=1, baseline=-3),
             }
         self.job_sector = {
             'service_low': 'service',
@@ -228,7 +228,7 @@ class Employer:
     def __init__(self, society):
         self.society = society
         self.jobs = [Job(society, self) for i in range(self.jobs_per_employer)]
-        self.neighbourhood = society.rng.choice(society.neighbourhoods)
+        self.neighbourhood = society.rng.choice(society.neighbourhoods[1:])
         self.location = self.neighbourhood.allocate_location()
         self.total_hiring_cost = 0
         self.total_salary = 0
@@ -641,6 +641,49 @@ class PovertyBiasIntervention:
             model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
             model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
 
+class NoHighschoolPenaltyIntervention:
+    def __init__(self, time, value,
+                 cost_sunk, cost_fixed, cost_variable, public_proportion):
+        self.time = time
+        self.value = value
+        self.cost_sunk = cost_sunk
+        self.cost_fixed = cost_fixed
+        self.cost_variable = cost_variable
+        self.public_proportion = public_proportion
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            model.society.interv_public += self.public_proportion * self.cost_sunk
+            model.society.interv_private += (1-self.public_proportion) * self.cost_sunk
+
+            for type, values in model.society.jobs.items():
+                values['no_highschool'] = self.value
+            model.society.get_job_cost_public += self.public_proportion * self.cost_variable
+            model.society.get_job_cost_private += (1 - self.public_proportion) * self.cost_variable
+        elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
+
+class RelocateIntervention:
+    def __init__(self, time, value,
+                 cost_sunk, cost_fixed, public_proportion):
+        self.time = time
+        self.value = value
+        self.cost_sunk = cost_sunk
+        self.cost_fixed = cost_fixed
+        self.public_proportion = public_proportion
+    def apply(self, model, timestep):
+        if timestep == self.time:
+            model.society.interv_public += self.public_proportion * self.cost_sunk
+            model.society.interv_private += (1-self.public_proportion) * self.cost_sunk
+
+            for i in range(self.value):
+                employer = model.rng.choice(model.employers)
+                employer.neighbourhood.free_location(employer.location)
+                employer.neighbourhood = model.society.neighbourhoods[0]
+                employer.location = employer.neighbourhood.allocate_location()
+        elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
 
 class DiscriminationIntervention:
     def __init__(self, time, value):
@@ -806,6 +849,18 @@ def run(seed, *actions):
                 interv = PovertyBiasIntervention(interv_step, 5, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
             elif action == 'povertybias-high':
                 interv = PovertyBiasIntervention(interv_step, 10, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'hsnotrequired-low':
+                interv = NoHighschoolPenaltyIntervention(interv_step, 3, cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'hsnotrequired-med':
+                interv = NoHighschoolPenaltyIntervention(interv_step, 1, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'hsnotrequired-high':
+                interv = NoHighschoolPenaltyIntervention(interv_step, 0, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'move-1':
+                interv = RelocateIntervention(interv_step, 1, cost_sunk=20000, cost_fixed=0, public_proportion=0.5)
+            elif action == 'move-2':
+                interv = RelocateIntervention(interv_step, 2, cost_sunk=40000, cost_fixed=0, public_proportion=0.5)
+            elif action == 'move-3':
+                interv = RelocateIntervention(interv_step, 3, cost_sunk=80000, cost_fixed=0, public_proportion=0.5)
             else:
                 interv = None
                 print 'unknown intervention', action

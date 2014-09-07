@@ -54,7 +54,7 @@ body, button, input {
 // change font
 // thick grey line
 // title logo
-*/
+*/  
 
 #top_bar {
   margin-bottom: 0.5em;
@@ -91,7 +91,7 @@ hr {
   margin: 10px;
   font-size: 20pt;
   text-align: center;
-  width: 20%;
+  width: 240px;
 }
 #controls {
   display: inline-block;
@@ -116,6 +116,13 @@ div.score {
    padding: 1em;
    }
    
+div.score p {
+   font-size: 14pt;
+   padding: 0px;
+   margin: 0px;
+   margin-bottom: 1em;
+}   
+   
 div.final {
    background: yellow;
    font-size: 30pt;
@@ -124,8 +131,7 @@ div.final {
 div#grid {
     background: #ddd;
     display: inline-block;
-    left: 20px;
-    top: 100px;
+    margin-left: 10px;
     width: 300px;
     height: 300px;    
    }

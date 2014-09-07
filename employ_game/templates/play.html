@@ -31,27 +31,33 @@
         <!--Interventions-->
         <div id='cen'>
         Name: <input id='username' type='text' value='%(name)s' onchange='update_name();'/>
-        <input type='button' value='restart' onclick='doaction("init");'/>
-        <input type='button' value='no new interventions' onclick='doaction("nothing");'/>
-        <input type='button' value='undo' onclick='doaction("undo")';/>
+        <input type='button' value='restart' onclick='doaction("init", this.value);'/>
+        <input type='button' value='no new interventions' onclick='doaction("nothing", this.value);'/>
+        <input type='button' value='undo' onclick='doaction("undo", this.value)';/>
         <br/>
-        <input type='button' value='Low Mobility' onclick='doaction("mobility-low");'/>
-        <input type='button' value='Low Wraparound' onclick='doaction("childcare-low");'/>
-        <input type='button' value='Low Highschool' onclick='doaction("highschool-low");'/>
-        <input type='button' value='Low Sector' onclick='doaction("sectormobility-low");'/>
-        <input type='button' value='Low Poverty' onclick='doaction("povertybias-low");'/>
+        <input type='button' value='Low Mobility' onclick='doaction("mobility-low", this.value);'/>
+        <input type='button' value='Low Wraparound' onclick='doaction("childcare-low", this.value);'/>
+        <input type='button' value='Low Highschool' onclick='doaction("highschool-low", this.value);'/>
+        <input type='button' value='Low Sector' onclick='doaction("sectormobility-low", this.value);'/>
+        <input type='button' value='Low Poverty' onclick='doaction("povertybias-low", this.value);'/>
+        <input type='button' value='Low HS Not Required' onclick='doaction("hsnotrequired-low", this.value);'/>
+        <input type='button' value='Relocate 1' onclick='doaction("move-1", this.value);'/>
         <br/>
-        <input type='button' value='Med Mobility' onclick='doaction("mobility-med");'/>
-        <input type='button' value='Med Wraparound' onclick='doaction("childcare-med");'/>
-        <input type='button' value='Med Highschool' onclick='doaction("highschool-med");'/>
-        <input type='button' value='Med Sector' onclick='doaction("sectormobility-med");'/>
-        <input type='button' value='Med Poverty' onclick='doaction("povertybias-med");'/>
+        <input type='button' value='Med Mobility' onclick='doaction("mobility-med", this.value);'/>
+        <input type='button' value='Med Wraparound' onclick='doaction("childcare-med", this.value);'/>
+        <input type='button' value='Med Highschool' onclick='doaction("highschool-med", this.value);'/>
+        <input type='button' value='Med Sector' onclick='doaction("sectormobility-med", this.value);'/>
+        <input type='button' value='Med Poverty' onclick='doaction("povertybias-med", this.value);'/>
+        <input type='button' value='Med HS Not Required' onclick='doaction("hsnotrequired-med", this.value);'/>
+        <input type='button' value='Relocate 2' onclick='doaction("move-2", this.value);'/>
         <br/>
-        <input type='button' value='High Mobility' onclick='doaction("mobility-high");'/>
-        <input type='button' value='High Wraparound' onclick='doaction("childcare-high");'/>
-        <input type='button' value='High Highschool' onclick='doaction("highschool-high");'/>
-        <input type='button' value='High Sector' onclick='doaction("sectormobility-high");'/>
-        <input type='button' value='High Poverty' onclick='doaction("povertybias-high");'/>
+        <input type='button' value='High Mobility' onclick='doaction("mobility-high", this.value);'/>
+        <input type='button' value='High Wraparound' onclick='doaction("childcare-high", this.value);'/>
+        <input type='button' value='High Highschool' onclick='doaction("highschool-high", this.value);'/>
+        <input type='button' value='High Sector' onclick='doaction("sectormobility-high", this.value);'/>
+        <input type='button' value='High Poverty' onclick='doaction("povertybias-high", this.value);'/>
+        <input type='button' value='High HS Not Required' onclick='doaction("hsnotrequired-high", this.value);'/>
+        <input type='button' value='Relocate 3' onclick='doaction("move-3", this.value);'/>
         </div>
     </div>
     </div>
@@ -81,7 +87,6 @@
             
       </div>
     
-    <hr>
     <div id='logo'>
       <img src="/static/img/hi-logos.png" />
     </div>
@@ -118,6 +123,7 @@ nv.addGraph(function() {
       .axisLabel('Time')
       .tickFormat(d3.format(',.2f'));                    
     chart_time.yAxis    
+      .axisLabel('Percentage')
       .tickFormat(d3.format(',.2f'));      
   
     return chart_time;
@@ -129,19 +135,19 @@ nv.addGraph(function() {
                     .useInteractiveGuideline(true)
                     .forceY([0, 100])
      .options({
-    margin: {left: 50, bottom: 30},
-    showXAxis: true,
+    margin: {left: 80, bottom: 30},
+    showXAxis: false,
     showYAxis: true,
     transitionDuration: 250
   })
                     
                     
                     
-    chart_time.xAxis     //Chart x-axis settings
+    chart_race.xAxis     //Chart x-axis settings
       .axisLabel('Time')
       .tickFormat(d3.format(',.2f'));                    
-    chart_time.yAxis    
-      .axisLabel('Employment')
+    chart_race.yAxis    
+      .axisLabel('Employment Percentage')
       .tickFormat(d3.format(',.2f'));      
   
     return chart_race;
@@ -181,11 +187,12 @@ nv.addGraph(function() {
     
     
 
-function doaction(action) {
+function doaction(action, text) {
     console.log(action);
     
     var data = new FormData();
     data.append('action', action);
+    data.append('action_text', text);
     data.append('uuid', "%(uuid)s");
     
     var xhr = new XMLHttpRequest();
@@ -197,18 +204,23 @@ function doaction(action) {
 function update() {
 	data = JSON.parse(this.responseText);
     
-    console.log(data);
     steps = data.time[0].values.length;
     score = data.time[0].values[steps-2].y;
     
+    production = data.money[0].values[0].y;
+    cost_hiring = data.money[1].values[1].y;
+    cost_salary = data.money[2].values[1].y;
+    cost_interv = data.money[3].values[1].y;
+    if (production < cost_hiring + cost_salary + cost_interv) {
+        score = 0;
+    }
     
-    console.log(steps);
     if (steps==102) {
             document.getElementById("score").className = 'score final';
             document.getElementById("score").innerHTML="FINAL SCORE: <strong>"+score.toFixed(1)+"%%</strong>";
     } else {
             document.getElementById("score").className = 'score';
-            document.getElementById("score").innerHTML="SCORE: <strong>"+score.toFixed(1)+"%%</strong>";
+            document.getElementById("score").innerHTML="<p>"+data.actions+"</p>SCORE: <strong>"+score.toFixed(1)+"%%</strong>";
     }
     
     d3.select('#chart_time svg')

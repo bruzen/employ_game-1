@@ -12,6 +12,7 @@ import model
 from collections import OrderedDict
 
 actions = OrderedDict()
+action_texts = OrderedDict()
 seeds = {}
 names = {}
 
@@ -115,20 +116,23 @@ class Server(employ_game.swi.SimpleWebInterface):
 
 
 
-    def swi_play_json(self, uuid, action):
+    def swi_play_json(self, uuid, action, action_text):
         maximum = 10
         substeps = 10
         name = self.get_name(uuid)
         if not actions.has_key(uuid) or action=='init':
             actions[uuid] = []
+            action_texts[uuid] = []
 
         if action == 'undo':
             if len(actions[uuid]) > 1:
                 del actions[uuid][-1]
+                del action_texts[uuid][-1]
         elif len(actions[uuid]) >= maximum:
             pass
         else:
             actions[uuid].append(action)
+            action_texts[uuid].append(action_text)
 
         data = self.run_game(uuid)
 
@@ -172,9 +176,11 @@ class Server(employ_game.swi.SimpleWebInterface):
         money.append(dict(key='salary', values=[{'x':0, 'y':0}, {'x':1, 'y':cost_salary}, {'x':2, 'y':0}]))
         money.append(dict(key='intervention', values=[{'x':0, 'y':0}, {'x':1, 'y':interv_private}, {'x':2, 'y':interv_public}]))
 
+        a = action_texts[uuid][1:]
+        a = ['%d: %s' % (i+1,x) for i,x in enumerate(a)]
+        a = '<br/>'.join(a)
 
-
-        return json.dumps(dict(time=time, race=race, race_pie=race_pie, grid=grid, money=money))
+        return json.dumps(dict(time=time, race=race, race_pie=race_pie, grid=grid, money=money, actions=a))
 
 
     def create_login_form(self):
