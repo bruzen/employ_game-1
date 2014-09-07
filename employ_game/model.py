@@ -16,6 +16,9 @@ class Society:
 
         self.interv_private = 0
         self.interv_public = 0
+        self.get_job_cost_public = 0
+        self.get_job_cost_private = 0
+
 
         # NOTE: order matters!  probabilities can be conditional on anything
         #       that is above them in the list below
@@ -375,6 +378,8 @@ class Model:
 
                         person.job = job
                         job.employee = person
+                        self.society.interv_public += self.society.get_job_cost_public
+                        self.society.interv_private += self.society.get_job_cost_private
                         person.job_evaluation = 'medium'
                         person.job_length = 0.0
 
@@ -561,12 +566,19 @@ class RetentionIntervention:
 
 
 class SocietyParameterIntervention:
-    def __init__(self, time, parameter, value):
+    def __init__(self, time, parameter, value,
+                 cost_sunk, cost_fixed, cost_variable, public_proportion):
         self.time = time
         self.parameter = parameter
         self.value = value
+        self.cost_sunk = cost_sunk
+        self.cost_fixed = cost_fixed
+        self.cost_variable = cost_variable
+        self.public_proportion = public_proportion
     def apply(self, model, timestep):
         if timestep == self.time:
+            model.society.interv_public += self.public_proportion * self.cost_sunk
+            model.society.interv_private += (1-self.public_proportion) * self.cost_sunk
             #print ('setting', self.parameter, self.value,
             #       'from', getattr(model.society, self.parameter))
             setattr(model.society, self.parameter, self.value)
@@ -581,9 +593,15 @@ class DiscriminationIntervention:
             #print ('setting', self.parameter, self.value,
             #       'from', getattr(model.society, self.parameter))
             model.society.set_racial_discrimination(self.value)
+            model.society.get_job_cost_public += self.public_proportion * self.cost_variable
+            model.society.get_job_cost_private += (1 - self.public_proportion) * self.cost_variable
+        elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
 
 class ChildcareIntervention:
-    def __init__(self, time, proportion, value, cost_sunk, cost_fixed, cost_variable, public_proportion):
+    def __init__(self, time, proportion, value,
+                 cost_sunk, cost_fixed, cost_variable, public_proportion):
         self.time = time
         self.proportion = proportion
         self.value = value
@@ -678,12 +696,18 @@ def run(seed, *actions):
             if action == 'hs_diploma':
                 interv = HighschoolCertificateIntervention(interv_step, 1.0)
                 model.interventions.append(interv)
-            elif action == 'mobility+':
+            elif action == 'mobility-high':
                 interv = SocietyParameterIntervention(interv_step,
-                                        'distance_penalty_scale', 0)
-            elif action == 'mobility-':
+                                        'distance_penalty_scale', 0,
+                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'mobility-med':
                 interv = SocietyParameterIntervention(interv_step,
-                                        'distance_penalty_scale', 10000.0)
+                                        'distance_penalty_scale', 0.5,
+                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'mobility-low':
+                interv = SocietyParameterIntervention(interv_step,
+                                        'distance_penalty_scale', 10,
+                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
             elif action == 'discriminate-normal':
                 interv = DiscriminationIntervention(interv_step, 0.3)
             elif action == 'discriminate-high':

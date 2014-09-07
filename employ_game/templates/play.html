@@ -32,19 +32,24 @@
         <div id='cen'>
         Name: <input id='username' type='text' value='%(name)s' onchange='update_name();'/>
         <input type='button' value='restart' onclick='doaction("init");'/>
-        <input type='button' value='nothing' onclick='doaction("nothing");'/>
-        <input type='button' value='High Mobility' onclick='doaction("mobility+");'/>
-        <input type='button' value='Standard Mobility' onclick='doaction("mobility-");'/>
+        <input type='button' value='do nothing' onclick='doaction("nothing");'/>
+        <input type='button' value='undo' onclick='doaction("undo")';/>
+        <br/>
+        <input type='button' value='Low Mobility' onclick='doaction("mobility-low");'/>
+        <input type='button' value='Low Wraparound' onclick='doaction("childcare-low");'/>
+        <br/>
+        <input type='button' value='Med Mobility' onclick='doaction("mobility-med");'/>
+        <input type='button' value='Med Wraparound' onclick='doaction("childcare-med");'/>
+        <br/>
+        <input type='button' value='High Mobility' onclick='doaction("mobility-high");'/>
+        <input type='button' value='High Wraparound' onclick='doaction("childcare-high");'/>
+        <br/>
         <input type='button' value='Normal Discrimination' onclick='doaction("discriminate-normal");'/>
         <input type='button' value='High Discrimination' onclick='doaction("discriminate-high");'/>
         <input type='button' value='Low Discrimination' onclick='doaction("discriminate-low");'/>
         <input type='button' value='Increase Retention' onclick='doaction("retention+");'/>
         <input type='button' value='Decrease Retention' onclick='doaction("retention-");'/>
         <input type='button' value='Highshool Diploma' onclick='doaction("hs_diploma");'/>
-        <input type='button' value='Childcare: None' onclick='doaction("childcare-low");'/>
-        <input type='button' value='Childcare: 40%%' onclick='doaction("childcare-med");'/>
-        <input type='button' value='Childcare: 80%%' onclick='doaction("childcare-high");'/>
-        <input type='button' value='undo' onclick='doaction("undo")';/>
         </div>
     </div>
     </div>
