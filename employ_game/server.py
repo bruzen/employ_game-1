@@ -74,27 +74,40 @@ class Server(employ_game.swi.SimpleWebInterface):
 
         data = {k: self.run_game(k) for k in uuids}
 
-        time = []
-        for i, uuid in enumerate(uuids):
-            color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][i % 6]
-            key = names[uuid]
-            values = []
-            for j in range(len(data[uuid]['employment'])):
-                values.append(dict(x=float(j)/substeps, y=data[uuid]['employment'][j]))
-            values.append(dict(x=maximum, y=None))
-            time.append(dict(values=values, key=key, color=color, area=False))
+        #time = []
+        #for i, uuid in enumerate(uuids):
+        #    color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][i % 6]
+        #    key = names[uuid]
+        #    values = []
+        #    for j in range(len(data[uuid]['employment'])):
+        #        values.append(dict(x=float(j)/substeps, y=data[uuid]['employment'][j]))
+        #    values.append(dict(x=maximum, y=None))
+        #    time.append(dict(values=values, key=key, color=color, area=False))
 
         bar = []
         for i, uuid in enumerate(uuids):
             color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][i % 6]
             key = names[uuid]
-            values = [dict(x=0, y=data[uuid]['employment'][-1]),
-                      dict(x=1, y=data[uuid]['highschool'][-1]),
+
+            employment = data[uuid]['employment'][-1]
+            runtime = len(data[uuid]['production']) * 0.1
+            production = sum(data[uuid]['production']) / runtime
+            cost_hiring = sum(data[uuid]['cost_hiring']) / runtime
+            cost_salary = sum(data[uuid]['cost_salary']) / runtime
+            interv_private = sum(data[uuid]['interv_private']) / runtime
+            interv_public = sum(data[uuid]['interv_public']) / runtime
+
+            cost = cost_hiring+cost_salary+interv_private
+
+            score = employment
+            if production < cost:
+                score = 0
+            values = [dict(x=0, y=score), dict(x=1, y=employment)
                       ]
             bar.append(dict(values=values, key=key, color=color))
 
 
-        return json.dumps(dict(time=time, bar=bar))
+        return json.dumps(dict(bar=bar))
 
     def get_name(self, uuid):
         if isinstance(uuid, uuid_package.UUID):
