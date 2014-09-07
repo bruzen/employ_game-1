@@ -14,6 +14,9 @@ class Society:
         self.gender = OrderedDict(male=0.5, female=0.5)
         self.race = OrderedDict(black=0.3, white=0.3, hispanic=0.2, asian=0.2)
 
+        self.interv_private = 0
+        self.interv_public = 0
+
         # NOTE: order matters!  probabilities can be conditional on anything
         #       that is above them in the list below
         # keys:   overall is p(F)
@@ -490,8 +493,8 @@ class Model:
         self.data['cost_hiring'] = []
         self.data['cost_salary'] = []
         self.data['production'] = []
-        self.data['cost_intervention_public'] = []
-        self.data['cost_intervention_private'] = []
+        self.data['interv_public'] = []
+        self.data['interv_private'] = []
 
         #for race in self.society.race.keys():
         #    self.data['employment_%s' % race] = []
@@ -513,6 +516,8 @@ class Model:
             self.data['cost_hiring'].append(sum([e.hiring_cost for e in self.employers]))
             self.data['cost_salary'].append(sum([e.salary for e in self.employers]))
             self.data['production'].append(sum([e.productivity for e in self.employers]))
+            self.data['interv_public'].append(self.society.interv_public)
+            self.data['interv_private'].append(self.society.interv_private)
             #for race in self.society.race.keys():
             #    self.data['employment_%s' % race].append(self.calc_feature_employment(race)*100)
             #    self.data['proportion_%s' % race].append(self.calc_feature_rate(race)*100)
@@ -576,12 +581,19 @@ class DiscriminationIntervention:
             model.society.set_racial_discrimination(self.value)
 
 class ChildcareIntervention:
-    def __init__(self, time, proportion, value):
+    def __init__(self, time, proportion, value, cost_sunk, cost_fixed, cost_variable, public_proportion):
         self.time = time
         self.proportion = proportion
         self.value = value
+        self.cost_sunk = cost_sunk
+        self.cost_fixed = cost_fixed
+        self.cost_variable = cost_variable
+        self.public_proportion = public_proportion
     def apply(self, model, timestep):
         if timestep == self.time:
+            model.society.interv_public += self.public_proportion * self.cost_sunk
+            model.society.interv_private += (1-self.public_proportion) * self.cost_sunk
+
             for p in model.people:
                 if 'childcare' in p.features:
                     if model.rng.rand() < self.proportion:
@@ -589,10 +601,15 @@ class ChildcareIntervention:
                     else:
                         p.childcare_support = 0
         elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
+
             for p in model.people:
                 if p.age < 16 + Model.years_per_step * 2:
                     if 'childcare' in p.features:
                         if model.rng.rand() < self.proportion:
+                            model.society.interv_public += self.public_proportion * self.cost_variable * Model.years_per_step
+                            model.society.interv_private += (1-self.public_proportion) * self.cost_variable * Model.years_per_step
                             p.childcare_support = self.value
                         else:
                             p.childcare_support = 0
@@ -676,11 +693,11 @@ def run(seed, *actions):
             elif action == 'retention-':
                 interv = RetentionIntervention(interv_step, 0.0)
             elif action == 'childcare-low':
-                interv = ChildcareIntervention(interv_step, 0.0, 0)
+                interv = ChildcareIntervention(interv_step, 0.2, 4000, cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
             elif action == 'childcare-med':
-                interv = ChildcareIntervention(interv_step, 0.4, 4000)
+                interv = ChildcareIntervention(interv_step, 0.5, 4000, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
             elif action == 'childcare-high':
-                interv = ChildcareIntervention(interv_step, 0.8, 4000)
+                interv = ChildcareIntervention(interv_step, 0.8, 4000, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
             else:
                 interv = None
                 print 'unknown intervention', action

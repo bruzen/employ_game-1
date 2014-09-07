@@ -161,9 +161,16 @@ class Server(employ_game.swi.SimpleWebInterface):
         grid = data['grid']
 
         money = []
-        money.append(dict(key='production', values=[{'x':0, 'y':100}, {'x':1, 'y':0}]))
-        money.append(dict(key='hiring', values=[{'x':0, 'y':0}, {'x':1, 'y':40}]))
-        money.append(dict(key='salary', values=[{'x':0, 'y':0}, {'x':1, 'y':50}]))
+        runtime = len(data['production']) * 0.1
+        production = sum(data['production']) / runtime
+        cost_hiring = sum(data['cost_hiring']) / runtime
+        cost_salary = sum(data['cost_salary']) / runtime
+        interv_private = sum(data['interv_private']) / runtime
+        interv_public = sum(data['interv_public']) / runtime
+        money.append(dict(key='production', values=[{'x':0, 'y':production}, {'x':1, 'y':0}, {'x':2, 'y':0}]))
+        money.append(dict(key='hiring', values=[{'x':0, 'y':0}, {'x':1, 'y':cost_hiring}, {'x':2, 'y':0}]))
+        money.append(dict(key='salary', values=[{'x':0, 'y':0}, {'x':1, 'y':cost_salary}, {'x':2, 'y':0}]))
+        money.append(dict(key='intervention', values=[{'x':0, 'y':0}, {'x':1, 'y':interv_private}, {'x':2, 'y':interv_public}]))
 
 
 
