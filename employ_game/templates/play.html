@@ -152,17 +152,19 @@ nv.addGraph(function() {
                     
 var chart_money;
 nv.addGraph(function() {
+    var bar_labels = ['production', 'cost(private)', 'cost(public)'];
     chart_money = nv.models.multiBarChart()
        .reduceXTicks(false)   //If 'false', every single x-axis tick label will be rendered.
        .rotateLabels(0)      //Angle to rotate x-axis labels.
        .showControls(false)   //Allow user to switch between 'Grouped' and 'Stacked' mode.
        .groupSpacing(0.1)    //Distance between each group of bars.
-       .showXAxis(false)
-       .margin({left:150, bottom:10})
+       .showXAxis(true)
+       .margin({left:150, bottom:30})
        .stacked(true);
        
+       
     chart_money.xAxis
-        .tickFormat(d3.format(',f'));
+        .tickFormat(function(d) { return bar_labels[d];});                   
     chart_money.yAxis
         .tickFormat(d3.format(',.1f'));
        
