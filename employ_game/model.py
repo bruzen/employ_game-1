@@ -61,10 +61,10 @@ class Society:
             }
         self.job_productivity = {
             # exponential curves take approx 3*exp_time to reach asymptote
-            'service_low': (22000, 0.5),    # final asymptote, exp_time
-            'service_high': (57000, 1),    # final asymptote, exp_time
-            'manufacturing_low': (27000, 0.5),    # final asymptote, exp_time
-            'manufacturing_high': (63000, 1),    # final asymptote, exp_time
+            'service_low': (32000, 0.5),    # final asymptote, exp_time
+            'service_high': (67000, 1),    # final asymptote, exp_time
+            'manufacturing_low': (37000, 0.5),    # final asymptote, exp_time
+            'manufacturing_high': (73000, 1),    # final asymptote, exp_time
         }
         self.job_hiring = {
             'service_low': 5000,
@@ -637,22 +637,33 @@ class ChildcareIntervention:
 
 
 class HighschoolCertificateIntervention:
-    def __init__(self, time, proportion):
+    def __init__(self, time, proportion,
+                 cost_sunk, cost_fixed, cost_variable, public_proportion):
         self.time = time
         self.proportion = proportion
+        self.cost_sunk = cost_sunk
+        self.cost_fixed = cost_fixed
+        self.cost_variable = cost_variable
+        self.public_proportion = public_proportion
 
     def apply(self, model, timestep):
         if timestep == self.time:
+            model.society.interv_public += self.public_proportion * self.cost_sunk
+            model.society.interv_private += (1-self.public_proportion) * self.cost_sunk
             for p in model.people:
                 if 'no_highschool' in p.features:
                     if model.rng.rand() < self.proportion:
                         p.features.append('highschool')
                         p.features.remove('no_highschool')
         elif timestep > self.time:
+            model.society.interv_public += self.public_proportion * self.cost_fixed * Model.years_per_step
+            model.society.interv_private += (1-self.public_proportion) * self.cost_fixed * Model.years_per_step
             for p in model.people:
                 if p.age < 16 + Model.years_per_step * 2:
                     if 'no_highschool' in p.features:
                         if model.rng.rand() < self.proportion:
+                            model.society.interv_public += self.public_proportion * self.cost_variable
+                            model.society.interv_private += (1-self.public_proportion) * self.cost_variable
                             p.features.append('highschool')
                             p.features.remove('no_highschool')
 
@@ -693,9 +704,15 @@ def run(seed, *actions):
     for i, action in enumerate(actions):
         if i > step:  # if we haven't done this step yet
             interv_step = presteps + 1 + steps_per_action * i
-            if action == 'hs_diploma':
-                interv = HighschoolCertificateIntervention(interv_step, 1.0)
-                model.interventions.append(interv)
+            if action == 'highschool-high':
+                interv = HighschoolCertificateIntervention(interv_step, 0.9,
+                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'highschool-med':
+                interv = HighschoolCertificateIntervention(interv_step, 0.5,
+                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+            elif action == 'highschool-low':
+                interv = HighschoolCertificateIntervention(interv_step, 0.2,
+                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
             elif action == 'mobility-high':
                 interv = SocietyParameterIntervention(interv_step,
                                         'distance_penalty_scale', 0,
