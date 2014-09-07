@@ -441,6 +441,7 @@ class Model:
                 total += 1
                 if p.job is not None:
                     count += 1
+        if total == 0: return 0
         return float(count) / total
 
     def calc_attribute_employment(self, attribute, threshold):
@@ -451,6 +452,7 @@ class Model:
                 total += 1
                 if p.job is not None:
                     count += 1
+        if total == 0: return 0
         return float(count) / total
 
     def calc_feature_rate(self, feature):
