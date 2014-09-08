@@ -168,7 +168,7 @@ class Server(employ_game.swi.SimpleWebInterface):
 
         time = []
         for i in range(2):
-            color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][i % 6]
+            color = ['blue', 'green', 'red', 'magenta', 'cyan', 'black'][i % 6]
             key = ['employment', 'highschool'][i]
             values = []
             for j in range(len(data[key])):
@@ -181,7 +181,7 @@ class Server(employ_game.swi.SimpleWebInterface):
         for k in sorted(data.keys()):
             if k.startswith('employment_'):
                 key = k[11:]
-                color = ['blue', 'red', 'green', 'magenta', 'cyan', 'black'][len(race) % 6]
+                color = ['blue', 'red', 'black', 'magenta', 'cyan', 'green'][len(race) % 6]
                 values = []
                 for j in range(len(data[k])):
                     values.append(dict(x=float(j)/substeps, y=data[k][j]))
