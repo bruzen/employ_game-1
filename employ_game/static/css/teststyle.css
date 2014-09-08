@@ -92,19 +92,16 @@ hr {
   font-size: 20pt;
   text-align: center;
   width: 240px;
+  vertical-align: top;
 }
 #controls {
+  vertical-align: top;
   display: inline-block;
-  width: 70%;
+  width: calc(100%-260px);
+  margin: 0px;
+  padding: 0px;
 }
 
-#controls>#cen {
-  /*  centerrrring div */
-  
-  margin-left: auto;
-  margin-right: auto;
-  
-}
 
 div.score {
     position: absolute;
@@ -181,3 +178,12 @@ div#logo {
     padding: 0px;
     margin: 0px;
 }
+
+table.interventions td input{
+    width: 100%;
+    }
+table.interventions th{
+    font-size:10pt;
+    padding-left: 10px;
+    padding-right: 10px;
+    }    

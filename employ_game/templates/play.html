@@ -35,29 +35,38 @@
         <input type='button' value='no new interventions' onclick='doaction("nothing", this.value);'/>
         <input type='button' value='undo' onclick='doaction("undo", this.value)';/>
         <br/>
-        <input type='button' value='Low Mobility' onclick='doaction("mobility-low", this.value);'/>
-        <input type='button' value='Low Wraparound' onclick='doaction("childcare-low", this.value);'/>
-        <input type='button' value='Low Highschool' onclick='doaction("highschool-low", this.value);'/>
-        <input type='button' value='Low Sector' onclick='doaction("sectormobility-low", this.value);'/>
-        <input type='button' value='Low Poverty' onclick='doaction("povertybias-low", this.value);'/>
-        <input type='button' value='Low HS Not Required' onclick='doaction("hsnotrequired-low", this.value);'/>
-        <input type='button' value='Relocate 1' onclick='doaction("move-1", this.value);'/>
-        <br/>
-        <input type='button' value='Med Mobility' onclick='doaction("mobility-med", this.value);'/>
-        <input type='button' value='Med Wraparound' onclick='doaction("childcare-med", this.value);'/>
-        <input type='button' value='Med Highschool' onclick='doaction("highschool-med", this.value);'/>
-        <input type='button' value='Med Sector' onclick='doaction("sectormobility-med", this.value);'/>
-        <input type='button' value='Med Poverty' onclick='doaction("povertybias-med", this.value);'/>
-        <input type='button' value='Med HS Not Required' onclick='doaction("hsnotrequired-med", this.value);'/>
-        <input type='button' value='Relocate 2' onclick='doaction("move-2", this.value);'/>
-        <br/>
-        <input type='button' value='High Mobility' onclick='doaction("mobility-high", this.value);'/>
-        <input type='button' value='High Wraparound' onclick='doaction("childcare-high", this.value);'/>
-        <input type='button' value='High Highschool' onclick='doaction("highschool-high", this.value);'/>
-        <input type='button' value='High Sector' onclick='doaction("sectormobility-high", this.value);'/>
-        <input type='button' value='High Poverty' onclick='doaction("povertybias-high", this.value);'/>
-        <input type='button' value='High HS Not Required' onclick='doaction("hsnotrequired-high", this.value);'/>
-        <input type='button' value='Relocate 3' onclick='doaction("move-3", this.value);'/>
+        <table class='interventions'>
+        <tr><th>Mobility</th><th>Childcare</th><th>Highschool</th>
+            <th>Skills Transfer</th><th>Supportive Hiring</th>
+            <th>Job Requirements</th><th>Relocation</th></tr>
+        <tr>    
+            <td><input type='button' value='Low' onclick='doaction("mobility-low", this.value, "Mobility");'/></td>
+            <td><input type='button' value='Low' onclick='doaction("childcare-low", this.value, "Childcare");'/></td>
+            <td><input type='button' value='Low' onclick='doaction("highschool-low", this.value, "Highschool");'/></td>
+            <td><input type='button' value='Low' onclick='doaction("sectormobility-low", this.value, "Skills Transfer");'/></td>
+            <td><input type='button' value='Low' onclick='doaction("povertybias-low", this.value, "Supportive Hiring");'/></td>
+            <td><input type='button' value='Low' onclick='doaction("hsnotrequired-low", this.value, "Job Requirements");'/></td>
+            <td><input type='button' value='Low' onclick='doaction("move-1", this.value, "Relocation");'/></td>
+        </tr>    
+        <tr>    
+            <td><input type='button' value='Med' onclick='doaction("mobility-med", this.value, "Mobility");'/></td>
+            <td><input type='button' value='Med' onclick='doaction("childcare-med", this.value, "Childcare");'/></td>
+            <td><input type='button' value='Med' onclick='doaction("highschool-med", this.value, "Highschool");'/></td>
+            <td><input type='button' value='Med' onclick='doaction("sectormobility-med", this.value, "Skills Transfer");'/></td>
+            <td><input type='button' value='Med' onclick='doaction("povertybias-med", this.value, "Supportive Hiring");'/></td>
+            <td><input type='button' value='Med' onclick='doaction("hsnotrequired-med", this.value, "Job Requirements");'/></td>
+            <td><input type='button' value='Med' onclick='doaction("move-2", this.value, "Relocation");'/></td>
+        </tr>    
+        <tr>    
+            <td><input type='button' value='High' onclick='doaction("mobility-high", this.value, "Mobility");'/></td>
+            <td><input type='button' value='High' onclick='doaction("childcare-high", this.value, "Childcare");'/></td>
+            <td><input type='button' value='High' onclick='doaction("highschool-high", this.value, "Highschool");'/></td>
+            <td><input type='button' value='High' onclick='doaction("sectormobility-high", this.value, "Skills Transfer");'/></td>
+            <td><input type='button' value='High' onclick='doaction("povertybias-high", this.value, "Supportive Hiring");'/></td>
+            <td><input type='button' value='High' onclick='doaction("hsnotrequired-high", this.value, "Job Requirements");'/></td>
+            <td><input type='button' value='High' onclick='doaction("move-3", this.value, "Relocation");'/></td>
+        </tr>    
+        </table>
         </div>
     </div>
     </div>
@@ -187,12 +196,12 @@ nv.addGraph(function() {
     
     
 
-function doaction(action, text) {
+function doaction(action, text, type) {
     console.log(action);
     
     var data = new FormData();
     data.append('action', action);
-    data.append('action_text', text);
+    data.append('action_text', type + '(' + text+ ')');
     data.append('uuid', "%(uuid)s");
     
     var xhr = new XMLHttpRequest();
