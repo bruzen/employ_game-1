@@ -34,6 +34,7 @@
         <input type='button' value='restart' onclick='doaction("init", this.value);'/>
         <input type='button' value='no new interventions' onclick='doaction("nothing", this.value);'/>
         <input type='button' value='undo' onclick='doaction("undo", this.value)';/>
+        Game #: <input id='seed' type='text' value='%(seed)s' onchange='update_seed();'/>
         <br/>
         <table class='interventions'>
         <tr><th>Mobility</th><th>Childcare</th><th>Highschool</th>
@@ -112,6 +113,21 @@ function update_name() {
     xhr.open('POST', '/set_name', true);
     xhr.send(data);
 }
+
+function update_seed() {
+    seed = document.getElementById('seed').value
+    var data = new FormData();
+    data.append('uuid', '%(uuid)s');
+    data.append('seed', seed);
+    data.append('action', 'init');
+    data.append('action_text', '');
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/play.json', true);
+    xhr.onload = update;
+    xhr.send(data);
+}
+
 
 
 var chart_time;
@@ -201,7 +217,11 @@ function doaction(action, text, type) {
     
     var data = new FormData();
     data.append('action', action);
-    data.append('action_text', type + '(' + text+ ')');
+    if (type == undefined) {
+        data.append('action_text', text);    
+    } else {
+        data.append('action_text', type + '(' + text+ ')');
+    }
     data.append('uuid', "%(uuid)s");
     
     var xhr = new XMLHttpRequest();

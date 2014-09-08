@@ -122,32 +122,37 @@ class Server(employ_game.swi.SimpleWebInterface):
 
     def swi_play(self, uuid=None):
         if uuid is None:
-            uuid = uuid_package.uuid4()
+            uuid = str(uuid_package.uuid4())
+        if not actions.has_key(uuid):
+            actions[uuid] = []
+            action_texts[uuid] = []
+            seeds[uuid] = uuid_package.UUID(uuid).int & 0x7fffffff
         if self.user is None:
             return self.create_login_form()
         html = pkgutil.get_data('employ_game', 'templates/play.html')
         name = self.get_name(uuid)
-        return html % dict(uuid=uuid, name=name)
+        return html % dict(uuid=uuid, name=name, seed=seeds[uuid])
 
     def swi_set_name(self, uuid, name):
         names[uuid] = name
 
     def run_game(self, u):
-        # TODO: add command line argument to set this seed globally
-        seed = uuid_package.UUID(u).int & 0x7fffffff
+        seed = seeds[u]
         acts = actions[u]
 
         return model.run(seed, *acts)
 
 
 
-    def swi_play_json(self, uuid, action, action_text):
+    def swi_play_json(self, uuid, action, action_text, seed=None):
         maximum = 10
         substeps = 10
         name = self.get_name(uuid)
-        if not actions.has_key(uuid) or action=='init':
+        if action == 'init':
             actions[uuid] = []
             action_texts[uuid] = []
+        if seed is not None:
+            seeds[uuid] = int(seed)
 
         if action == 'undo':
             if len(actions[uuid]) > 1:
