@@ -165,6 +165,10 @@ div#logo {
 #grid svg g circle {
     stroke-width:0px;
 }
+#grid svg g line {
+    stroke-width:1px;
+    stroke: white;
+}
 
 .tooltip {
     background: white;

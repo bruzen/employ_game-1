@@ -293,6 +293,17 @@ function update_grid(grid_data) {
     if (dy < dx) dx = dy;
     else dy = dx;
     
+    grid.append('line')
+        .attr('x1', dx*cols/2)
+        .attr('x2', dx*cols/2)
+        .attr('y1', 0)
+        .attr('y2', dx*rows);
+    grid.append('line')
+        .attr('y1', dx*cols/2)
+        .attr('y2', dx*cols/2)
+        .attr('x1', 0)
+        .attr('x2', dx*rows);
+    
     
     
     for (var i=0; i<grid_data.length; i++) {
