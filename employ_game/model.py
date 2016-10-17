@@ -806,25 +806,25 @@ def run(seed, *actions):
             interv_step = presteps + 1 + steps_per_action * i
             if action == 'highschool-high':
                 interv = HighschoolCertificateIntervention(interv_step, 0.9,
-                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                                        cost_sunk=30000, cost_fixed=1, cost_variable=10, public_proportion=0.5)
             elif action == 'highschool-med':
                 interv = HighschoolCertificateIntervention(interv_step, 0.5,
-                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                                        cost_sunk=25000, cost_fixed=1, cost_variable=10, public_proportion=0.5)
             elif action == 'highschool-low':
                 interv = HighschoolCertificateIntervention(interv_step, 0.2,
-                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                                        cost_sunk=15000, cost_fixed=1, cost_variable=10, public_proportion=0.5)
             elif action == 'mobility-high':
                 interv = SocietyParameterIntervention(interv_step,
                                         'distance_penalty_scale', 0,
-                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                                        cost_sunk=3000, cost_fixed=15000, cost_variable=1, public_proportion=0.5)
             elif action == 'mobility-med':
                 interv = SocietyParameterIntervention(interv_step,
                                         'distance_penalty_scale', 0.5,
-                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                                        cost_sunk=2000, cost_fixed=10000, cost_variable=1, public_proportion=0.5)
             elif action == 'mobility-low':
                 interv = SocietyParameterIntervention(interv_step,
                                         'distance_penalty_scale', 10,
-                                        cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                                        cost_sunk=1000, cost_fixed=5000, cost_variable=1, public_proportion=0.5)
             elif action == 'discriminate-normal':
                 interv = DiscriminationIntervention(interv_step, 0.3)
             elif action == 'discriminate-high':
@@ -836,29 +836,29 @@ def run(seed, *actions):
             elif action == 'retention-':
                 interv = RetentionIntervention(interv_step, 0.0)
             elif action == 'childcare-low':
-                interv = ChildcareIntervention(interv_step, 0.2, 4000, cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                interv = ChildcareIntervention(interv_step, 0.2, 4000, cost_sunk=15000, cost_fixed=5000, cost_variable=10, public_proportion=0.5)
             elif action == 'childcare-med':
-                interv = ChildcareIntervention(interv_step, 0.5, 4000, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+                interv = ChildcareIntervention(interv_step, 0.5, 4000, cost_sunk=21000, cost_fixed=8000, cost_variable=10, public_proportion=0.5)
             elif action == 'childcare-high':
-                interv = ChildcareIntervention(interv_step, 0.8, 4000, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+                interv = ChildcareIntervention(interv_step, 0.8, 4000, cost_sunk=25000, cost_fixed=10000, cost_variable=10, public_proportion=0.5)
             elif action == 'sectormobility-low':
-                interv = SectorMobilityIntervention(interv_step, 0.2, cost_sunk=20000, cost_fixed=5000, public_proportion=0.5)
+                interv = SectorMobilityIntervention(interv_step, 0.2, cost_sunk=10000, cost_fixed=5000, public_proportion=0.5)
             elif action == 'sectormobility-med':
-                interv = SectorMobilityIntervention(interv_step, 0.5, cost_sunk=40000, cost_fixed=15000, public_proportion=0.5)
+                interv = SectorMobilityIntervention(interv_step, 0.5, cost_sunk=20000, cost_fixed=8000, public_proportion=0.5)
             elif action == 'sectormobility-high':
-                interv = SectorMobilityIntervention(interv_step, 0.8, cost_sunk=80000, cost_fixed=15000, public_proportion=0.5)
+                interv = SectorMobilityIntervention(interv_step, 0.8, cost_sunk=30000, cost_fixed=10000, public_proportion=0.5)
             elif action == 'povertybias-low':
-                interv = PovertyBiasIntervention(interv_step, 2, cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                interv = PovertyBiasIntervention(interv_step, 2, cost_sunk=5000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
             elif action == 'povertybias-med':
-                interv = PovertyBiasIntervention(interv_step, 5, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+                interv = PovertyBiasIntervention(interv_step, 5, cost_sunk=10000, cost_fixed=8000, cost_variable=1000, public_proportion=0.5)
             elif action == 'povertybias-high':
-                interv = PovertyBiasIntervention(interv_step, 10, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+                interv = PovertyBiasIntervention(interv_step, 10, cost_sunk=15000, cost_fixed=10000, cost_variable=1000, public_proportion=0.5)
             elif action == 'hsnotrequired-low':
-                interv = NoHighschoolPenaltyIntervention(interv_step, 3, cost_sunk=20000, cost_fixed=5000, cost_variable=1000, public_proportion=0.5)
+                interv = NoHighschoolPenaltyIntervention(interv_step, 3, cost_sunk=10000, cost_fixed=1, cost_variable=1000, public_proportion=0.5)
             elif action == 'hsnotrequired-med':
-                interv = NoHighschoolPenaltyIntervention(interv_step, 1, cost_sunk=40000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+                interv = NoHighschoolPenaltyIntervention(interv_step, 1, cost_sunk=20000, cost_fixed=1, cost_variable=1000, public_proportion=0.5)
             elif action == 'hsnotrequired-high':
-                interv = NoHighschoolPenaltyIntervention(interv_step, 0, cost_sunk=80000, cost_fixed=15000, cost_variable=1000, public_proportion=0.5)
+                interv = NoHighschoolPenaltyIntervention(interv_step, 0, cost_sunk=30000, cost_fixed=1, cost_variable=1000, public_proportion=0.5)
             elif action == 'move-1':
                 interv = RelocateIntervention(interv_step, 1, cost_sunk=20000, cost_fixed=0, public_proportion=0.5)
             elif action == 'move-2':
